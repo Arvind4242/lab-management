@@ -20,7 +20,10 @@ public function report_test() {
     return $this->belongsTo(ReportTest::class);
 }
 
-
+ public function test()
+    {
+        return $this->belongsTo(Test::class);
+    }
 
     // public function report() {
     //     return $this->belongsTo(Report::class);

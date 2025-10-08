@@ -29,3 +29,16 @@ Route::get('/', function () {
 
 Route::get('/admin/reports/{report}/print', [ReportController::class, 'print'])->name('reports.print');
 Route::get('/admin/reports/{report}/download', [ReportController::class, 'download'])->name('reports.download');
+Route::get('/reports/create', [ReportController::class, 'create'])->name('reports.create');
+Route::post('/reports/store', [ReportController::class, 'store'])->name('reports.store');
+
+// For AJAX request to fetch tests by panel
+Route::get('/reports/panel-tests/{panel}', [ReportController::class, 'getPanelTests'])->name('reports.panel.tests');
+
+Route::get('/reports/{report}/edit', [ReportController::class, 'edit'])->name('reports.edit');
+Route::put('/reports/{report}', [ReportController::class, 'update'])->name('reports.update');
+
+
+// For print & PDF
+Route::get('/reports/{report}/print', [ReportController::class, 'print'])->name('reports.print');
+Route::get('/reports/{report}/download', [ReportController::class, 'download'])->name('reports.download');

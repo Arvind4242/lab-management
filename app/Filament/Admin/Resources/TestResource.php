@@ -30,7 +30,7 @@ public static function form(Form $form): Form
         ->schema([
             Forms\Components\TextInput::make('name')
                 ->required()
-                ->unique()
+                // ->unique()
                 ->maxLength(255),
 
             Forms\Components\TextInput::make('short_name')

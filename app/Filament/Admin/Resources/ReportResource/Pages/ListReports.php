@@ -13,7 +13,9 @@ class ListReports extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\Action::make('Create Report')
+                ->url(route('reports.create')) // 👈 point to custom route
+                ->icon('heroicon-o-plus'),
         ];
     }
 }

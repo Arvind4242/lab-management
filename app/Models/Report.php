@@ -15,6 +15,11 @@ class Report extends Model
     //     return $this->hasMany(ReportTest::class);
     // }
 
+     public function report_results()
+    {
+        return $this->hasMany(ReportResult::class);
+    }
+
     public function results() {
     return $this->hasMany(ReportResult::class, 'report_id');
 }

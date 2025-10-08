@@ -39,15 +39,13 @@ class TestPanelResource extends Resource
                     ->required(),
                 Forms\Components\Toggle::make('hide_method_instrument')
                     ->required(),
-              Select::make('tests')
-                ->label('Select Tests')
-                ->multiple()
-                ->options(
-                    Test::pluck('name', 'id')
-                )
-                ->searchable()
-                ->required()
-                ->columnSpanFull(),
+                Select::make('tests')
+                    ->label('Select Tests')
+                    ->multiple()
+                    ->options(Test::pluck('name', 'id'))
+                    ->searchable()
+                    ->required()
+                    ->columnSpanFull(),
                 Forms\Components\Textarea::make('interpretation')
                     ->columnSpanFull(),
             ]);
