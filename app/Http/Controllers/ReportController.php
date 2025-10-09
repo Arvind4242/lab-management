@@ -6,6 +6,7 @@ use App\Models\Report;
 use App\Models\TestPanel;
 use Illuminate\Http\Request;
 use PDF;
+use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
@@ -23,24 +24,29 @@ class ReportController extends Controller
         return response()->json($tests);
     }
 
-    public function store(Request $request)
-    {
-        $report = Report::create($request->only([
-            'patient_name', 'age', 'gender', 'referred_by', 'client_name', 'test_date'
-        ]));
+   public function store(Request $request)
+{
+    // dd($request->all());
+    // Create the report
+    $report = Report::create($request->only([
+        'patient_name', 'age', 'gender', 'referred_by', 'client_name', 'test_date',  'test_panel_id',
+    ]));
 
-        foreach ($request->input('tests', []) as $testData) {
-    $report->report_results()->create([
-        'report_test_id' => $testData['report_test_id'],
-        'test_name' => $testData['test_name'] ?? '',
-        'value' => $testData['value'] ?? null,
-    ]);
-}
-
-
-        return redirect()->route('reports.print', $report->id)
-                         ->with('success', 'Report created successfully!');
+    // Save test results
+    foreach ($request->input('tests', []) as $testData) {
+        $report->report_results()->create([
+            'report_test_id'    => $testData['test_id'] ?? null,
+            'test_name'         => $testData['test_name'] ?? null,
+            'parameter_name'    => $testData['parameter_name'] ?? null,
+            'value'             => $testData['value'] ?? null,
+            'unit'              => $testData['unit'] ?? null,
+            'reference_range'   => $testData['reference_range'] ?? null,
+        ]);
     }
+
+    return redirect()->route('reports.print', $report->id)
+                     ->with('success', 'Report created successfully!');
+}
 
 
     public function edit(Report $report)
@@ -73,10 +79,21 @@ public function update(Request $request, Report $report)
 
 
     // 🖨️ Preview report in print-friendly format
-    public function print(Report $report)
-    {
-        return view('reports.print', compact('report'));
-    }
+
+
+public function print($reportId)
+{
+    // Fetch the report along with related panel and results
+    $report = Report::with(['panel', 'results'])->findOrFail($reportId);
+
+    // Log the data
+    \Log::info('Report data fetched for print:', $report->toArray());
+
+    return view('reports.print', compact('report'));
+}
+
+
+
 
 
     // 📄 Download report as PDF

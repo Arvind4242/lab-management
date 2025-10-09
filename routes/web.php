@@ -42,3 +42,5 @@ Route::put('/reports/{report}', [ReportController::class, 'update'])->name('repo
 // For print & PDF
 Route::get('/reports/{report}/print', [ReportController::class, 'print'])->name('reports.print');
 Route::get('/reports/{report}/download', [ReportController::class, 'download'])->name('reports.download');
+
+Route::post('/reports/panel-tests', [ReportController::class, 'getPanelTestsPost']);
