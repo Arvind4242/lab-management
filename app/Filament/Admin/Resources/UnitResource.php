@@ -59,14 +59,14 @@ class UnitResource extends Resource
                 Tables\Actions\CreateAction::make(),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -74,5 +74,13 @@ class UnitResource extends Resource
             'create' => Pages\CreateUnit::route('/create'),
             'edit' => Pages\EditUnit::route('/{record}/edit'),
         ];
-    }    
+
+
+    }
+
+public static function canViewAny(): bool
+{
+    return auth()->user()?->role === 'admin';
+}
+
 }

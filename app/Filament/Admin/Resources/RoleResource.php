@@ -48,14 +48,14 @@ class RoleResource extends Resource
                 Tables\Actions\CreateAction::make(),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -63,5 +63,11 @@ class RoleResource extends Resource
             'create' => Pages\CreateRole::route('/create'),
             'edit' => Pages\EditRole::route('/{record}/edit'),
         ];
-    }    
+    }
+
+    public static function canViewAny(): bool
+{
+    return auth()->user()?->role === 'admin';
+}
+
 }

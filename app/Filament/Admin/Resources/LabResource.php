@@ -22,7 +22,7 @@ class LabResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    
+
     // protected static ?string $navigationIcon = 'heroicon-o-office-building';
     protected static ?string $navigationLabel = 'Labs';
     protected static ?string $pluralLabel = 'Labs';
@@ -35,10 +35,10 @@ class LabResource extends Resource
                  TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                
+
                 TextInput::make('address')
                     ->maxLength(255),
-                
+
                 TextInput::make('phone')
                     ->maxLength(20),
             ]);
@@ -65,21 +65,27 @@ class LabResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListLabs::route('/'),
             'create' => Pages\CreateLab::route('/create'),
             'edit' => Pages\EditLab::route('/{record}/edit'),
-            
+
         ];
-    }    
+    }
+
+    public static function canViewAny(): bool
+{
+    return auth()->user()?->role === 'admin';
+}
+
 }

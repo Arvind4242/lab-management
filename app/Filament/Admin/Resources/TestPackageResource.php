@@ -82,4 +82,10 @@ class TestPackageResource extends Resource
             'edit' => Pages\EditTestPackage::route('/{record}/edit'),
         ];
     }
+
+    public static function canViewAny(): bool
+{
+    return auth()->user()?->role === 'admin';
+}
+
 }

@@ -18,7 +18,7 @@ class SubscriptionResource extends Resource
     protected static ?string $model = Subscription::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    
+
     // protected static ?string $navigationIcon = 'heroicon-o-collection';
     protected static ?string $navigationLabel = 'Subscriptions';
     protected static ?string $pluralLabel = 'Subscriptions';
@@ -77,14 +77,14 @@ class SubscriptionResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -92,5 +92,11 @@ class SubscriptionResource extends Resource
             'create' => Pages\CreateSubscription::route('/create'),
             'edit' => Pages\EditSubscription::route('/{record}/edit'),
         ];
-    }    
+    }
+
+    public static function canViewAny(): bool
+{
+    return auth()->user()?->role === 'admin';
+}
+
 }
