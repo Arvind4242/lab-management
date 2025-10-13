@@ -18,18 +18,44 @@ use Illuminate\Support\Facades\Hash;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
+use Illuminate\Support\Facades\Auth;
 
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    // protected static ?string $navigationIcon = 'heroicon-o-user';
+
+    // Optional: default navigation group
+    // protected static ?string $navigationGroup = 'Admin';
+
+    /**
+     * Change label based on user role
+     */
+    /**
+ * Sidebar label: show "Users" for admins, "Profile" for normal users
+ */
+public static function getNavigationLabel(): string
+{
+    return auth()->user()?->role === 'admin' ? 'Users' : 'Profile';
+}
 
 
+    /**
+     * Optionally hide the group for normal users
+     */
+    // public static function getNavigationGroup(): ?string
+    // {
+    //     return auth()->user()?->role === 'admin' ? 'Admin' : null;
+    // }
 
 public static function form(Form $form): Form
 {
+    $isAdmin = auth()->user()?->role === 'admin';
+
     return $form
         ->schema([
             Section::make('User Details')
@@ -60,12 +86,33 @@ public static function form(Form $form): Form
                             'user' => 'User',
                         ])
                         ->required()
-                        ->default('user'),
+                        ->default('user')
+                        ->disabled(!$isAdmin), // only admin can change role
                 ])
                 ->columns(2),
 
             Section::make('Lab Information')
                 ->schema([
+                    Select::make('lab_id')
+                        ->label('Select Lab')
+                        ->required()
+                        ->searchable()
+                        ->options(function () use ($isAdmin) {
+                            // Admins see all labs
+                            if ($isAdmin) {
+                                return \App\Models\Lab::pluck('name', 'id');
+                            }
+
+                            // Normal users see only their assigned lab
+                            $userLabId = auth()->user()?->lab_id;
+                            if ($userLabId) {
+                                return \App\Models\Lab::where('id', $userLabId)->pluck('name', 'id');
+                            }
+
+                            return [];
+                        })
+                        ->disabled(!$isAdmin && auth()->user()?->lab_id), // editable only if admin or user has no lab yet
+
                     TextInput::make('lab_code')
                         ->label('Lab Code')
                         ->maxLength(255)
@@ -122,41 +169,66 @@ public static function form(Form $form): Form
         ]);
 }
 
-    public static function table(Table $table): Table
-    {
 
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('name')->label('name')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('email')->label('Email Address')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('role')->label('Role')->sortable()->searchable(),
-                Tables\Columns\ImageColumn::make('logo')->label('Logo'),
-                Tables\Columns\ImageColumn::make('digital_signature')->label('Signature'),
+  public static function table(Table $table): Table
+{
+    $isAdmin = auth()->user()?->role === 'admin';
 
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created At')
-                    ->dateTime('M d, Y H:i')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Updated At')
-                    ->dateTime('M d, Y H:i')
-                    ->sortable(),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ])
-            ->emptyStateActions([
-                Tables\Actions\CreateAction::make(),
-            ]);
+    return $table
+        ->columns([
+            Tables\Columns\TextColumn::make('name')->label('Name')->sortable()->searchable(),
+            Tables\Columns\TextColumn::make('email')->label('Email Address')->sortable()->searchable(),
+            Tables\Columns\TextColumn::make('role')->label('Role')->sortable()->searchable(),
+            Tables\Columns\ImageColumn::make('logo')->label('Logo'),
+            Tables\Columns\ImageColumn::make('digital_signature')->label('Signature'),
+            Tables\Columns\TextColumn::make('created_at')
+                ->label('Created At')
+                ->dateTime('M d, Y H:i')
+                ->sortable(),
+            Tables\Columns\TextColumn::make('updated_at')
+                ->label('Updated At')
+                ->dateTime('M d, Y H:i')
+                ->sortable(),
+        ])
+        ->filters([
+            //
+        ])
+        ->actions([
+            Tables\Actions\EditAction::make(),
+        ])
+       ->bulkActions($isAdmin ? [
+    Tables\Actions\BulkActionGroup::make([
+        Tables\Actions\DeleteBulkAction::make(),
+    ]),
+] : [])
+
+->emptyStateActions($isAdmin ? [
+    Tables\Actions\CreateAction::make(),
+] : [])
+
+        ->defaultSort('created_at', 'desc');
+}
+
+public static function canCreate(): bool
+{
+    // Only admins can create users
+    return auth()->user()?->role === 'admin';
+}
+
+
+public static function getEloquentQuery(): Builder
+{
+    $query = parent::getEloquentQuery();
+
+    // Admin sees all users
+    if (auth()->user()?->role === 'admin') {
+        return $query;
     }
+
+    // Normal users see only themselves
+    return $query->where('id', auth()->id());
+}
+
 
     public static function getRelations(): array
     {
@@ -174,12 +246,21 @@ public static function form(Form $form): Form
         ];
     }
 
-public static function canViewAny(): bool
-{
-    return auth()->user()?->role === 'admin';
-}
+// public static function canViewAny(): bool
+// {
+//     return auth()->user()?->role === 'admin';
+// }
 
+// public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+// {
+//     $query = parent::getEloquentQuery();
 
+//     if (Auth::user()->role === 'admin') {
+//         return $query; // show all
+//     }
+
+//     return $query->where('id', Auth::id());
+// }
 
 
 }

@@ -6,6 +6,7 @@ use App\Models\Report;
 use App\Models\TestPanel;
 use Illuminate\Http\Request;
 use PDF;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
@@ -24,13 +25,17 @@ class ReportController extends Controller
         return response()->json($tests);
     }
 
-   public function store(Request $request)
+ public function store(Request $request)
 {
     // dd($request->all());
-    // Create the report
-    $report = Report::create($request->only([
-        'patient_name', 'age', 'gender', 'referred_by', 'client_name', 'test_date',  'test_panel_id',
-    ]));
+
+    // Create the report with authenticated user
+    $report = Report::create(array_merge(
+        $request->only([
+            'patient_name', 'age', 'gender', 'referred_by', 'client_name', 'test_date', 'test_panel_id',
+        ]),
+        ['user_id' => Auth::id()] // add the logged-in user's ID
+    ));
 
     // Save test results
     foreach ($request->input('tests', []) as $testData) {
@@ -49,13 +54,18 @@ class ReportController extends Controller
 }
 
 
-    public function edit(Report $report)
+   public function edit(Report $report)
 {
     // Load all related results with their tests and units (if available)
     $report->load(['report_results.report_test', 'report_results.report_test.test_unit']);
 
-    return view('reports.edit', compact('report'));
+    // Get all test panels for the dropdown
+    $panels = \App\Models\TestPanel::pluck('name', 'id');
+
+    // Pass both report and panels to the view
+    return view('reports.edit', compact('report', 'panels'));
 }
+
 
 public function update(Request $request, Report $report)
 {

@@ -48,7 +48,9 @@ public static function getTestsById($panelId)
                 'id' => $test->id,
                 'name' => $test->name,
                 'unit' => $test->unit ? $test->unit->name : '', // fetch unit name
-                'reference_range' => $test->default_result ?? '',
+                'reference_range_male' => $test->default_result,           // male
+                'reference_range_female' => $test->default_result_female,  // female
+                'reference_range_other' => $test->default_result_other,
             ];
         });
 }

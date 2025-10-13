@@ -9,7 +9,7 @@ class Test extends Model
 {
      protected $fillable = [
         'name', 'short_name', 'category_id', 'unit_id', 'input_type',
-        'default_result', 'optional', 'price', 'method', 'instrument', 'interpretation'
+        'default_result','default_result_female', 'default_result_other', 'optional', 'price', 'method', 'instrument', 'interpretation'
     ];
 
     public function reports()

@@ -8,8 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Report extends Model
 {
      protected $fillable = [
-        'patient_name','age','gender','test_date','remarks','referred_by', 'client_name','test_panel_id', 
+       'user_id','patient_name','age','gender','remarks','referred_by', 'client_name','test_panel_id',
     ];
+
+    protected $casts = [
+    'test_date' => 'date',
+];
+
 
     // public function report_tests() {
     //     return $this->hasMany(ReportTest::class);

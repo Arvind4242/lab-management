@@ -544,8 +544,11 @@
         <div class="footer">
             <div class="end-text">------------ END OF REPORT ------------</div>
             <div class="footer-note">
-                Note: This report is subject to the terms and conditions mentioned overleaf.
-                Partial reproduction of this report is not permitted.
+                 @if(auth()->user()?->address)
+                    <div><strong>Note:</strong> {{ auth()->user()->note }}</div>
+                @endif
+                {{-- Note: This report is subject to the terms and conditions mentioned overleaf.
+                Partial reproduction of this report is not permitted. --}}
             </div>
         </div>
 

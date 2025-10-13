@@ -18,6 +18,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\HasManyRepeater;
 use Filament\Forms\Components\Repeater;
+use Illuminate\Support\Facades\Auth;
 
 class ReportResource extends Resource
 {
@@ -26,7 +27,7 @@ class ReportResource extends Resource
     protected static ?string $navigationLabel = 'Reports';
     protected static ?string $pluralModelLabel = 'Reports';
     protected static ?string $modelLabel = 'Report';
-    protected static ?string $navigationGroup = 'Lab Management';
+    // protected static ?string $navigationGroup = 'Lab Management';
 
 
 
@@ -82,7 +83,11 @@ public static function form(Form $form): Form
             Tables\Columns\TextColumn::make('created_at')->since()->label('Created'),
         ])
         ->actions([
-            Tables\Actions\ViewAction::make(), Tables\Actions\EditAction::make(), Tables\Actions\DeleteAction::make(), Tables\Actions\Action::make('preview') ->label('Preview') ->icon('heroicon-o-eye') ->url(fn($record) => route('reports.print', $record)) ->openUrlInNewTab(), Tables\Actions\Action::make('download') ->label('Download PDF') ->icon('heroicon-o-arrow-down-tray') ->url(fn($record) => route('reports.download', $record)),
+            Tables\Actions\ViewAction::make(),
+            Tables\Actions\EditAction::make()->url(fn($record) => route('reports.edit', $record)),
+            Tables\Actions\DeleteAction::make(),
+            Tables\Actions\Action::make('preview') ->label('Preview') ->icon('heroicon-o-eye') ->url(fn($record) => route('reports.print', $record)) ->openUrlInNewTab(),
+            Tables\Actions\Action::make('download') ->label('Download PDF') ->icon('heroicon-o-arrow-down-tray') ->url(fn($record) => route('reports.download', $record)),
         ])
         ->bulkActions([
             Tables\Actions\DeleteBulkAction::make(),
@@ -104,4 +109,17 @@ public static function form(Form $form): Form
             'edit' => Pages\EditReport::route('/{record}/edit'),
         ];
     }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+{
+    $query = parent::getEloquentQuery();
+
+    if (Auth::user()->role === 'admin') {
+        return $query; // show all
+    }
+
+    return $query->where('user_id', Auth::id());
+}
+
+
 }

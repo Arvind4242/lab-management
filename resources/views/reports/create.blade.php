@@ -23,9 +23,9 @@
                     <label class="form-label">Gender</label>
                     <select name="gender" class="form-select" required>
                         <option value="">Select</option>
-                        <option>Male</option>
-                        <option>Female</option>
-                        <option>Other</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -52,7 +52,6 @@
                     @endforeach
                 </select>
             </div>
-            <!-- Hidden input to save selected panel -->
             <input type="hidden" name="test_panel_id" id="test_panel_id">
 
             <!-- Test Table -->
@@ -76,6 +75,7 @@
 
             <!-- Buttons -->
             <div class="d-flex justify-content-start gap-3 btn-group-custom">
+                <a href="{{ url()->previous() }}" class="btn btn-warning">↩️ Return</a>
                 <button type="submit" class="btn btn-success">💾 Save</button>
                 <button type="button" class="btn btn-primary" id="previewBtn">👁️ Preview</button>
                 <button type="button" class="btn btn-secondary" id="printBtn">🖨️ Print</button>
@@ -86,12 +86,12 @@
 
 @push('styles')
 <style>
-    body { background-color: #f8f9fa; }
-    .report-container { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 0 6px rgba(0,0,0,0.1); }
-    .section-title { background: #e9ecef; padding: 8px 12px; font-weight: 600; border-radius: 5px; margin-bottom: 15px; }
-    table th { background: #f1f3f4; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
-    table td input { height: 32px; padding: 5px 8px; }
-    .btn-group-custom button { min-width: 120px; }
+body { background-color: #f8f9fa; }
+.report-container { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 0 6px rgba(0,0,0,0.1); }
+.section-title { background: #e9ecef; padding: 8px 12px; font-weight: 600; border-radius: 5px; margin-bottom: 15px; }
+table th { background: #f1f3f4; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
+table td input { height: 32px; padding: 5px 8px; }
+.btn-group-custom button { min-width: 120px; }
 </style>
 @endpush
 
@@ -99,10 +99,12 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function() {
+    const genderSelect = $('select[name="gender"]');
+
     // Load tests when panel changes
     $('#test_panel').on('change', function() {
         let panelId = $(this).val();
-        $('#test_panel_id').val(panelId); // save selected panel
+        $('#test_panel_id').val(panelId);
 
         if (!panelId) {
             $('#test-list').html('<tr><td colspan="4" class="text-center text-muted">Select a test panel to load tests.</td></tr>');
@@ -115,19 +117,29 @@ $(function() {
                 return;
             }
 
+            let gender = genderSelect.val() || 'Male';
             let rows = '';
+
             tests.forEach((test, index) => {
+                let refRange = gender === 'Male' ? test.reference_range_male
+                               : gender === 'Female' ? test.reference_range_female
+                               : test.reference_range_other;
+
                 rows += `
                     <tr>
                         <td>${test.name}
                             <input type="hidden" name="tests[${index}][test_id]" value="${test.id}">
                             <input type="hidden" name="tests[${index}][test_name]" value="${test.name}">
                             <input type="hidden" name="tests[${index}][unit]" value="${test.unit}">
-                            <input type="hidden" name="tests[${index}][reference_range]" value="${test.reference_range}">
+                            <input type="hidden" name="tests[${index}][reference_range]"
+                                   value="${refRange}"
+                                   data-male="${test.reference_range_male}"
+                                   data-female="${test.reference_range_female}"
+                                   data-other="${test.reference_range_other}">
                         </td>
                         <td><input type="text" name="tests[${index}][value]" class="form-control" placeholder="Enter result"></td>
                         <td>${test.unit}</td>
-                        <td>${test.reference_range}</td>
+                        <td class="ref-range">${refRange}</td>
                     </tr>
                 `;
             });
@@ -135,6 +147,22 @@ $(function() {
             $('#test-list').html(rows);
         }).fail(function() {
             $('#test-list').html('<tr><td colspan="4" class="text-center text-danger">Error loading tests.</td></tr>');
+        });
+    });
+
+    // Update reference range when gender changes
+    genderSelect.on('change', function() {
+        let gender = $(this).val();
+        $('#test-list tr').each(function() {
+            let refInput = $(this).find('input[name$="[reference_range]"]');
+            if (!refInput.length) return;
+
+            let refRange = gender === 'Male' ? refInput.data('male')
+                           : gender === 'Female' ? refInput.data('female')
+                           : refInput.data('other');
+
+            $(this).find('td.ref-range').text(refRange);
+            refInput.val(refRange);
         });
     });
 
