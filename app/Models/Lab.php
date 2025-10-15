@@ -20,4 +20,9 @@ class Lab extends Model
     {
         return $this->hasMany(Subscription::class);
     }
+
+     public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
 }

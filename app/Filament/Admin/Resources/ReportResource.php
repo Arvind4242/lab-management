@@ -1,11 +1,13 @@
 <?php
 
 namespace App\Filament\Admin\Resources;
-
+use Filament\Tables\Filters\SelectFilter;
 use App\Filament\Admin\Resources\ReportResource\Pages;
 use App\Filament\Admin\Resources\ReportResource\RelationManagers\ResultsRelationManager;
 use App\Models\Report;
 use App\Models\Test;
+use App\Models\Lab;
+use App\Models\User;
 use App\Models\TestPanel;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -82,6 +84,21 @@ public static function form(Form $form): Form
             Tables\Columns\TextColumn::make('remarks')->limit(30),
             Tables\Columns\TextColumn::make('created_at')->since()->label('Created'),
         ])
+         ->filters([
+                // SelectFilter::make('lab_id')
+                //     ->label('Lab')
+                //     ->options(Lab::pluck('name', 'id'))
+                //     ->visible(fn() => Auth::user()->role === 'admin'),
+
+                SelectFilter::make('user_id')
+                    ->label('User')
+                    ->options(User::pluck('name', 'id'))
+                    ->visible(fn() => Auth::user()->role === 'admin'),
+
+                // SelectFilter::make('report_tests.test_panel_id')
+                //     ->label('Test Panel')
+                //     ->options(TestPanel::pluck('name', 'id')),
+            ])
         ->actions([
             Tables\Actions\ViewAction::make(),
             Tables\Actions\EditAction::make()->url(fn($record) => route('reports.edit', $record)),
