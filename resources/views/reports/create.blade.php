@@ -1,9 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
+<a href="http://127.0.0.1:8000/admin/reports" class="btn btn-warning">↩️ Back</a>
+
 <div class="container my-4">
     <div class="report-container">
         <h4 class="mb-4">🧾 Create Lab Report</h4>
+
+        {{-- ✅ Success Message --}}
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
 
         <form action="{{ route('reports.store') }}" method="POST" id="reportForm">
             @csrf
@@ -45,14 +55,21 @@
             <!-- Test Panel -->
             <div class="section-title">Select Test Panel</div>
             <div class="mb-3">
-                <select id="test_panel" class="form-select">
-                    <option value="">-- Select Panel --</option>
-                    @foreach ($panels as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
+                <select id="test_selector" class="form-select">
+                    <option value="">-- Select Test Panel or Single Test --</option>
+                    <optgroup label="Test Panels">
+                        @foreach ($panels as $id => $name)
+                            <option value="panel_{{ $id }}">{{ $name }} (Panel)</option>
+                        @endforeach
+                    </optgroup>
+                    <optgroup label="Individual Tests">
+                        @foreach ($tests as $test)
+                            <option value="test_{{ $test->id }}">{{ $test->name }}</option>
+                        @endforeach
+                    </optgroup>
                 </select>
+                <input type="hidden" name="test_panel_id" id="test_panel_id">
             </div>
-            <input type="hidden" name="test_panel_id" id="test_panel_id">
 
             <!-- Test Table -->
             <div class="table-responsive mb-4">
@@ -75,10 +92,7 @@
 
             <!-- Buttons -->
             <div class="d-flex justify-content-start gap-3 btn-group-custom">
-                <a href="{{ url()->previous() }}" class="btn btn-warning">↩️ Return</a>
                 <button type="submit" class="btn btn-success">💾 Save</button>
-                <button type="button" class="btn btn-primary" id="previewBtn">👁️ Preview</button>
-                <button type="button" class="btn btn-secondary" id="printBtn">🖨️ Print</button>
             </div>
         </form>
     </div>
@@ -100,54 +114,96 @@ table td input { height: 32px; padding: 5px 8px; }
 <script>
 $(function() {
     const genderSelect = $('select[name="gender"]');
+    const testList = $('#test-list');
 
-    // Load tests when panel changes
-    $('#test_panel').on('change', function() {
-        let panelId = $(this).val();
-        $('#test_panel_id').val(panelId);
+    // Handle dropdown change
+    $('#test_selector').on('change', function() {
+        let selected = $(this).val();
+        $('#test_panel_id').val(''); // reset
+        testList.html('<tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>');
 
-        if (!panelId) {
-            $('#test-list').html('<tr><td colspan="4" class="text-center text-muted">Select a test panel to load tests.</td></tr>');
+        if (!selected) {
+            testList.html('<tr><td colspan="4" class="text-center text-muted">Select a test panel or test.</td></tr>');
             return;
         }
 
-        $.get(`/reports/panel-tests/${panelId}`, function(tests) {
-            if (!tests || tests.length === 0) {
-                $('#test-list').html('<tr><td colspan="4" class="text-center text-danger">No tests found for this panel.</td></tr>');
-                return;
-            }
+        if (selected.startsWith('panel_')) {
+            let panelId = selected.replace('panel_', '');
+            $('#test_panel_id').val(panelId);
 
-            let gender = genderSelect.val() || 'Male';
-            let rows = '';
-
-            tests.forEach((test, index) => {
-                let refRange = gender === 'Male' ? test.reference_range_male
-                               : gender === 'Female' ? test.reference_range_female
-                               : test.reference_range_other;
-
-                rows += `
-                    <tr>
-                        <td>${test.name}
-                            <input type="hidden" name="tests[${index}][test_id]" value="${test.id}">
-                            <input type="hidden" name="tests[${index}][test_name]" value="${test.name}">
-                            <input type="hidden" name="tests[${index}][unit]" value="${test.unit}">
-                            <input type="hidden" name="tests[${index}][reference_range]"
-                                   value="${refRange}"
-                                   data-male="${test.reference_range_male}"
-                                   data-female="${test.reference_range_female}"
-                                   data-other="${test.reference_range_other}">
-                        </td>
-                        <td><input type="text" name="tests[${index}][value]" class="form-control" placeholder="Enter result"></td>
-                        <td>${test.unit}</td>
-                        <td class="ref-range">${refRange}</td>
-                    </tr>
-                `;
+            $.get(`/reports/panel-tests/${panelId}`, function(tests) {
+                renderTests(tests);
+            }).fail(() => {
+                testList.html('<tr><td colspan="4" class="text-center text-danger">Error loading panel tests.</td></tr>');
             });
 
-            $('#test-list').html(rows);
-        }).fail(function() {
-            $('#test-list').html('<tr><td colspan="4" class="text-center text-danger">Error loading tests.</td></tr>');
+        } else if (selected.startsWith('test_')) {
+            let testId = selected.replace('test_', '');
+            $.get(`/reports/test/${testId}`, function(test) {
+                if (!test || !test.id) {
+                    testList.html('<tr><td colspan="4" class="text-center text-danger">Test not found.</td></tr>');
+                    return;
+                }
+                renderTests([test]);
+            }).fail(() => {
+                testList.html('<tr><td colspan="4" class="text-center text-danger">Error loading test.</td></tr>');
+            });
+        }
+    });
+
+    // Render tests in table
+    function renderTests(tests) {
+        if (!tests || tests.length === 0) {
+            testList.html('<tr><td colspan="4" class="text-center text-danger">No tests found.</td></tr>');
+            return;
+        }
+
+        let gender = genderSelect.val() || 'Male';
+        let rows = '';
+
+        tests.forEach((test, index) => {
+            let refRange = gender === 'Male' ? test.reference_range_male
+                        : gender === 'Female' ? test.reference_range_female
+                        : test.reference_range_other;
+
+            rows += `
+                <tr>
+                    <td>${test.name}
+                        <input type="hidden" name="tests[${index}][test_id]" value="${test.id}">
+                        <input type="hidden" name="tests[${index}][test_name]" value="${test.name}">
+                        <input type="hidden" name="tests[${index}][unit]" value="${test.unit}">
+                        <input type="hidden" name="tests[${index}][reference_range]"
+                            value="${refRange}"
+                            data-male="${test.reference_range_male}"
+                            data-female="${test.reference_range_female}"
+                            data-other="${test.reference_range_other}">
+                    </td>
+                    <td><input type="text" name="tests[${index}][value]" class="form-control result-input" placeholder="Enter result"></td>
+                    <td>${test.unit}</td>
+                    <td class="ref-range">${refRange}</td>
+                </tr>
+            `;
         });
+
+        testList.html(rows);
+    }
+
+    // Color result based on range
+    $(document).on('input', '.result-input', function() {
+        let value = parseFloat($(this).val());
+        let refRange = $(this).closest('tr').find('.ref-range').text().trim();
+        let $input = $(this);
+        $input.css('color', ''); // reset
+
+        let parts = refRange.split('-').map(p => parseFloat(p.trim()));
+        if (parts.length === 2 && !isNaN(value)) {
+            let [min, max] = parts;
+            if (value < min || value > max) {
+                $input.css('color', 'red');
+            } else {
+                $input.css('color', 'green');
+            }
+        }
     });
 
     // Update reference range when gender changes
@@ -156,31 +212,28 @@ $(function() {
         $('#test-list tr').each(function() {
             let refInput = $(this).find('input[name$="[reference_range]"]');
             if (!refInput.length) return;
-
             let refRange = gender === 'Male' ? refInput.data('male')
-                           : gender === 'Female' ? refInput.data('female')
-                           : refInput.data('other');
-
+                          : gender === 'Female' ? refInput.data('female')
+                          : refInput.data('other');
             $(this).find('td.ref-range').text(refRange);
             refInput.val(refRange);
         });
     });
 
-    // Preview
-    $('#previewBtn').click(function() {
-        alert('Preview feature will show report layout before final print.');
-    });
-
-    // Print
-    $('#printBtn').click(function() {
-        window.print();
-    });
-
-    // Ensure hidden field is set on submit
+    // Disable save button after submit to prevent duplicates
     $('#reportForm').on('submit', function() {
-        $('#test_panel_id').val($('#test_panel').val());
+        const $btn = $(this).find('button[type="submit"]');
+        $btn.prop('disabled', true).text('Saving...');
     });
+
+    // ✅ Reset form and scroll to message after success
+    @if(session('success'))
+        $('#reportForm')[0].reset();
+        $('#test-list').html('<tr><td colspan="4" class="text-center text-muted">Select a test panel to load tests.</td></tr>');
+        $('html, body').animate({ scrollTop: 0 }, 'slow');
+    @endif
 });
 </script>
 @endpush
+
 @endsection

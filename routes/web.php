@@ -38,6 +38,8 @@ Route::middleware(['auth'])->group(function() {
     // AJAX: fetch tests by panel
     Route::get('/reports/panel-tests/{panel}', [ReportController::class, 'getPanelTests'])->name('reports.panel.tests');
     Route::post('/reports/panel-tests', [ReportController::class, 'getPanelTestsPost'])->name('reports.panel.tests.post');
+    Route::get('/reports/test/{id}', [ReportController::class, 'getSingleTest']);
+
 
     // Print & Download
     Route::get('/reports/{report}/print', [ReportController::class, 'print'])->name('reports.print');

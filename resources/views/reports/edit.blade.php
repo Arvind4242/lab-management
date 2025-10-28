@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<a href="http://127.0.0.1:8000/admin/reports" class="btn btn-warning">↩️ Back</a>
 <div class="container my-4">
     <div class="report-container">
         <h4 class="mb-4">✏️ Edit Lab Report</h4>
@@ -89,7 +90,7 @@
 
             <!-- Buttons -->
             <div class="d-flex justify-content-start gap-3 btn-group-custom mb-3">
-                <a href="{{ url()->previous() }}" class="btn btn-warning">↩️ Return</a>
+                {{-- <a href="{{ url()->previous() }}" class="btn btn-warning">↩️ Return</a> --}}
                 <button type="submit" class="btn btn-success">💾 Update</button>
                 <button type="button" class="btn btn-primary" id="previewBtn">👁️ Preview</button>
                 <button type="button" class="btn btn-secondary" id="printBtn">🖨️ Print</button>

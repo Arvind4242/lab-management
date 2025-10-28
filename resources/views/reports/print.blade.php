@@ -357,11 +357,14 @@
         <div class="header">
             <div class="header-left">
                 {{-- Logo --}}
-                @if(auth()->user()?->logo)
-                    <img src="{{ asset('storage/' . auth()->user()->logo) }}"
-                         alt="Lab Logo"
-                         class="logo-img">
-                @endif
+          @if(auth()->user()?->logo)
+    <img src="{{ asset('storage/' . auth()->user()->logo) }}"
+         alt="Lab Logo"
+         style="width:100px; height:auto;">
+@endif
+
+
+
 
                 {{-- Lab Name and Code --}}
                 {{-- <div>

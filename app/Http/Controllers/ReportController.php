@@ -15,7 +15,8 @@ class ReportController extends Controller
  public function create()
     {
         $panels = TestPanel::pluck('name', 'id');
-        return view('reports.create', compact('panels'));
+        $tests = \App\Models\Test::select('id', 'name')->get(); // 👈 added
+    return view('reports.create', compact('panels', 'tests'));
     }
 
     // AJAX: fetch tests from a panel
@@ -25,33 +26,66 @@ class ReportController extends Controller
         return response()->json($tests);
     }
 
- public function store(Request $request)
+ public function getSingleTest($id)
 {
-    // dd($request->all());
+    // Log that a request was made
+    Log::info('Fetching single test details', ['test_id' => $id]);
 
-    // Create the report with authenticated user
-    $report = Report::create(array_merge(
-        $request->only([
-            'patient_name', 'age', 'gender', 'referred_by', 'client_name', 'test_date', 'test_panel_id',
-        ]),
-        ['user_id' => Auth::id()] // add the logged-in user's ID
-    ));
+    $test = \App\Models\Test::with('unit')->find($id);
 
-    // Save test results
-    foreach ($request->input('tests', []) as $testData) {
-        $report->report_results()->create([
-            'report_test_id'    => $testData['test_id'] ?? null,
-            'test_name'         => $testData['test_name'] ?? null,
-            'parameter_name'    => $testData['parameter_name'] ?? null,
-            'value'             => $testData['value'] ?? null,
-            'unit'              => $testData['unit'] ?? null,
-            'reference_range'   => $testData['reference_range'] ?? null,
-        ]);
+    if (!$test) {
+        Log::warning('Test not found', ['test_id' => $id]);
+        return response()->json(['error' => 'Test not found'], 404);
     }
 
-    return redirect()->route('reports.print', $report->id)
-                     ->with('success', 'Report created successfully!');
+    // Log the test details for debugging
+    Log::info('Test details fetched', [
+        'id' => $test->id,
+        'name' => $test->name,
+        'unit' => $test->unit ? $test->unit->name : null,
+        'reference_male_range' => $test->default_result_male,
+        'reference_female_range' => $test->default_result_female,
+        'reference_other_range' => $test->default_result_other,
+    ]);
+
+    return response()->json([
+        'id' => $test->id,
+        'name' => $test->name,
+        'unit' => $test->unit ? $test->unit->name : '',
+        'reference_range_male' => $test->default_result_male,
+        'reference_range_female' => $test->default_result_female,
+        'reference_range_other' => $test->default_result_other,
+    ]);
 }
+
+
+
+    public function store(Request $request)
+    {
+        // dd($request->all());
+
+        // Create the report with authenticated user
+        $report = Report::create(array_merge(
+            $request->only([
+                'patient_name', 'age', 'gender', 'referred_by', 'client_name', 'test_date', 'test_panel_id',
+            ]),
+            ['user_id' => Auth::id()] // add the logged-in user's ID
+        ));
+
+        // Save test results
+        foreach ($request->input('tests', []) as $testData) {
+            $report->report_results()->create([
+                'report_test_id'    => $testData['test_id'] ?? null,
+                'test_name'         => $testData['test_name'] ?? null,
+                'parameter_name'    => $testData['parameter_name'] ?? null,
+                'value'             => $testData['value'] ?? null,
+                'unit'              => $testData['unit'] ?? null,
+                'reference_range'   => $testData['reference_range'] ?? null,
+            ]);
+        }
+
+          return redirect()->back()->with('success', 'Report saved successfully!');
+    }
 
 
    public function edit(Report $report)

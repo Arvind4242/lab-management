@@ -152,19 +152,22 @@ public static function form(Form $form): Form
 
             Section::make('Uploads')
                 ->schema([
-                    FileUpload::make('logo')
-                        ->label('Lab Logo')
-                        ->image()
-                        ->directory('logos')
-                        ->maxSize(2048)
-                        ->imagePreviewHeight('80'),
+                   FileUpload::make('logo')
+    ->label('Lab Logo')
+    ->image()
+    ->directory('logos')
+    ->disk('public')  // add this
+    ->maxSize(2048)
+    ->imagePreviewHeight('80'),
 
-                    FileUpload::make('digital_signature')
-                        ->label('Digital Signature')
-                        ->image()
-                        ->directory('signatures')
-                        ->maxSize(2048)
-                        ->imagePreviewHeight('80'),
+FileUpload::make('digital_signature')
+    ->label('Digital Signature')
+    ->image()
+    ->directory('signatures')
+    ->disk('public') // add this
+    ->maxSize(2048)
+    ->imagePreviewHeight('80'),
+
                 ])
                 ->columns(2),
         ]);
@@ -180,8 +183,31 @@ public static function form(Form $form): Form
             Tables\Columns\TextColumn::make('name')->label('Name')->sortable()->searchable(),
             Tables\Columns\TextColumn::make('email')->label('Email Address')->sortable()->searchable(),
             Tables\Columns\TextColumn::make('role')->label('Role')->sortable()->searchable(),
-            Tables\Columns\ImageColumn::make('logo')->label('Logo'),
-            Tables\Columns\ImageColumn::make('digital_signature')->label('Signature'),
+         Tables\Columns\ImageColumn::make('logo')
+                ->label('Logo')
+                ->disk('public') // points to storage/app/public
+                ->getStateUsing(function ($record) {
+                    // Return null if no logo
+                    if (!$record->logo) {
+                        return null;
+                    }
+
+                    // Ensure filename is safe for URL
+                    return 'logos/' . ltrim($record->logo, '/');
+                }),
+
+            // Digital signature image
+            Tables\Columns\ImageColumn::make('digital_signature')
+                ->label('Signature')
+                ->disk('public')
+                ->getStateUsing(function ($record) {
+                    if (!$record->digital_signature) {
+                        return null;
+                    }
+
+                    return 'signatures/' . ltrim($record->digital_signature, '/');
+                }),
+
             Tables\Columns\TextColumn::make('created_at')
                 ->label('Created At')
                 ->dateTime('M d, Y H:i')
