@@ -12,6 +12,15 @@ class ReportResult extends Model
         'report_id', 'report_test_id', 'test_name', 'parameter_name', 'value', 'unit', 'reference_range'
     ];
 
+    protected $appends = ['category_name'];
+
+public function getCategoryNameAttribute()
+{
+    return $this->test && $this->test->category
+        ? $this->test->category->name
+        : null;
+}
+
     public function report() {
     return $this->belongsTo(Report::class);
 }
@@ -20,10 +29,10 @@ public function report_test() {
     return $this->belongsTo(ReportTest::class);
 }
 
- public function test()
-    {
-        return $this->belongsTo(Test::class);
-    }
+public function test()
+{
+    return $this->belongsTo(Test::class, 'report_test_id');
+}
 
     // public function report() {
     //     return $this->belongsTo(Report::class);

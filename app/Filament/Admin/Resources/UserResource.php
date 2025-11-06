@@ -162,11 +162,16 @@ public static function form(Form $form): Form
 
 FileUpload::make('digital_signature')
     ->label('Digital Signature')
-    ->image()
-    ->directory('signatures')
-    ->disk('public') // add this
-    ->maxSize(2048)
-    ->imagePreviewHeight('80'),
+    ->image() // Enable image-specific options
+    ->imageEditor() // Enable built-in Filament image editor (crop/rotate/flip)
+    ->imageCropAspectRatio('3:1') // Optional – good for signature shape
+    ->imageResizeMode('cover') // Resize after crop
+    ->imageResizeTargetWidth('600') // Adjust as needed
+    ->imageResizeTargetHeight('200')
+    ->directory('signatures') // Folder inside /storage/app/public
+    ->disk('public')
+    ->visibility('public')
+    ->required(false),
 
                 ])
                 ->columns(2),

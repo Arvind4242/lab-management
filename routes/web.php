@@ -50,4 +50,6 @@ Route::middleware(['auth'])->group(function() {
         Route::get('/reports/{report}/print', [ReportController::class, 'print'])->name('reports.admin.print');
         Route::get('/reports/{report}/download', [ReportController::class, 'download'])->name('reports.admin.download');
     });
+
+Route::get('/testView/{reportId}', [ReportController::class, 'testView'])->name('report.testView');
 });

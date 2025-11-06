@@ -66,7 +66,7 @@ public static function getTestsById($panelId)
 
     public function category()
     {
-        return $this->belongsTo(TestCategory::class);
+        return $this->belongsTo(TestCategory::class, 'category_id');
     }
 
     public function testPackages()

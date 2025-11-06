@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\Report;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,10 +17,11 @@ class Test extends Model
         return $this->hasMany(Report::class);
     }
 
-    public function category()
-    {
-        return $this->belongsTo(TestCategory::class);
-    }
+   public function category()
+{
+    return $this->belongsTo(TestCategory::class, 'category_id');
+}
+
 
     public function unit()
     {

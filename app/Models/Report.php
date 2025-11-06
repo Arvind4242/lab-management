@@ -22,9 +22,11 @@ class Report extends Model
 
 
     public function results()
-    {
-    return $this->hasMany(ReportResult::class, 'report_id');
-    }
+{
+    return $this->hasMany(ReportResult::class, 'report_id')
+                ->with(['test.category']);
+}
+
 
 
     public function report_tests()

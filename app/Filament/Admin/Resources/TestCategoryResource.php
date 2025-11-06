@@ -41,19 +41,19 @@ class TestCategoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
             ]);
+            // ->bulkActions([
+            //     Tables\Actions\DeleteBulkAction::make(),
+            // ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -61,5 +61,5 @@ class TestCategoryResource extends Resource
             'create' => Pages\CreateTestCategory::route('/create'),
             'edit' => Pages\EditTestCategory::route('/{record}/edit'),
         ];
-    }    
+    }
 }
