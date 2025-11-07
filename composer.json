@@ -12,7 +12,7 @@
         "barryvdh/laravel-dompdf": "^3.1",
         "blade-ui-kit/blade-heroicons": "^2.6",
         "blade-ui-kit/blade-icons": "^1.8",
-        "filament/filament": "3.0",
+        "filament/filament": "3.2",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
@@ -21,6 +21,7 @@
         "spatie/laravel-permission": "^6.21"
     },
     "require-dev": {
+        "deployer/deployer": "^7.5",
         "fakerphp/faker": "^1.9.1",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.18",

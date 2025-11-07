@@ -40,6 +40,16 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'lab_id',
+        'lab_code',
+        'logo',
+        'address',
+        'website',
+        'mobile',
+        'reference_lab',
+        'note',
+        'digital_signature',
+        'qualification',
     ];
 
     /**
@@ -66,6 +76,21 @@ class User extends Authenticatable
         {
             return $this->belongsTo(Role::class);
         }
+
+    public function lab()
+    {
+        return $this->belongsTo(Lab::class);
+    }
+
+    public function getLogoUrlAttribute()
+{
+    return $this->logo ? asset('storage/' . $this->logo) : null;
+}
+
+public function getDigitalSignatureUrlAttribute()
+{
+    return $this->digital_signature ? asset('storage/' . $this->digital_signature) : null;
+}
 
 
 }

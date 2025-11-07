@@ -16,7 +16,7 @@ class TestPackageResource extends Resource
 {
     protected static ?string $model = TestPackage::class;
 
-    // protected static ?string $navigationIcon = 'heroicon-o-collection';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
@@ -82,4 +82,10 @@ class TestPackageResource extends Resource
             'edit' => Pages\EditTestPackage::route('/{record}/edit'),
         ];
     }
+
+    public static function canViewAny(): bool
+{
+    return auth()->user()?->role === 'admin';
+}
+
 }

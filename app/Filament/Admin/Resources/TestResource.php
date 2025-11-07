@@ -56,8 +56,16 @@ public static function form(Form $form): Form
                 ->required(),
 
             Forms\Components\Textarea::make('default_result')
-                ->label('Default Result')
+                ->label('Default Result Male')
                 ->rows(3),
+
+            Forms\Components\Textarea::make('default_result_female')
+            ->label('Default Result Female')
+            ->rows(3),
+
+            Forms\Components\Textarea::make('default_result_other')
+            ->label('Default Result Other')
+            ->rows(3),
 
             Forms\Components\Toggle::make('optional')
                 ->label('Optional')
@@ -100,11 +108,11 @@ public static function form(Form $form): Form
                 Tables\Actions\EditAction::make(),
                  Tables\Actions\DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ])
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //     ]),
+            // ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),
             ]);

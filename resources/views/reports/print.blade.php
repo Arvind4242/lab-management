@@ -1,150 +1,357 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Lab Report - {{ $report->patient_name ?? 'N/A' }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $report->report_name ?? 'Path24 Labs - Medical Report' }}</title>
     <style>
+        /* ✅ Your original CSS is untouched */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; padding: 20px; background: #fff; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; border: 2px solid #000; padding: 0; }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        /* .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #333; } */
+      /* ---------- HEADER SECTION ---------- */
+.header {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between; /* 👈 pushes right block to far right */
+    padding: 10px 20px;
+    font-family: Arial, sans-serif;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 10px;
+}
 
-        /* Header */
-        header { display: flex; justify-content: space-between; padding: 20px; border-bottom: 2px solid #000; }
-        .logo-section { flex: 1; }
-        .logo-text { font-size: 48px; font-weight: bold; color: #008B8B; line-height: 1; }
-        .logo-text .path { color: #008B8B; }
-        .logo-text .number { color: #FDB714; }
-        .tagline { color: #FDB714; font-size: 14px; font-style: italic; margin-top: 5px; }
-        .lab-details { text-align: right; font-size: 11px; line-height: 1.6; }
-        .lab-details strong { font-weight: bold; }
+.logo-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
 
-        /* Patient Info */
-        .patient-info { padding: 20px; border-bottom: 2px solid #000; }
-        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 13px; }
-        .info-item { display: flex; gap: 10px; }
-        .info-label { font-weight: bold; min-width: 120px; }
-        .info-value { color: #333; }
+.logo-section img {
+    width: 180px;
+}
 
-        /* Test Header */
-        .test-header { background: #f5f5f5; padding: 15px 20px; text-align: center; border-bottom: 2px solid #000; }
-        .test-header h2 { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
-        .test-header h3 { font-size: 14px; font-weight: bold; }
+.barcode {
+    width: 150px;
+    height: 25px;
+    margin-top: 10px;
+    background: repeating-linear-gradient(
+        to right,
+        black 0,
+        black 2px,
+        white 2px,
+        white 4px
+    );
+}
 
-        /* Results Table */
-        .results-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .results-table thead { background: #f0f0f0; }
-        .results-table th, .results-table td { padding: 10px; text-align: left; font-size: 13px; border-bottom: 1px solid #ddd; }
-        .results-table th { font-weight: bold; border-right: 1px solid #ddd; }
-        .results-table td { border-right: 1px solid #ddd; }
-        .results-table th:last-child, .results-table td:last-child { border-right: none; }
+/* 👇 Wraps divider + contact info, aligned to the right */
+.right-block {
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
+}
 
-        .result-low { color: #f44336; font-weight: bold; }
-        .result-high { color: #e91e63; font-weight: bold; }
-        .result-normal { color: #4caf50; font-weight: bold; }
+/* Divider: full height of contact section */
+.divider {
+    width: 2px;
+    background-color: #00838f;
+    margin: 8px 20px 8px 0;
+    border-radius: 2px;
+}
 
-        /* Remarks */
-        .remarks-section { padding: 15px 20px; border-top: 1px solid #ddd; font-size: 13px; }
-        .remarks-section .label { font-weight: bold; margin-right: 10px; }
+/* Contact Info Right-Aligned */
+.contact-info {
+    text-align: left;        /* 👈 aligns all text to the right */
+    font-size: 13px;
+    line-height: 1.6;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
 
-        /* Footer */
-        .end-report { text-align: center; padding: 15px; font-size: 12px; font-weight: bold; border-top: 2px solid #000; }
+.contact-info strong {
+    color: #00838f;
+}
 
-        @media print {
-            body { padding: 0; }
-            .container { border: none; }
-            @page { margin: 10mm; }
-        }
+
+
+
+        /* .logo-section { flex: 1; } */
+        .logo { font-size: 42px; font-weight: bold; margin-bottom: 5px; }
+        .path { color: #008B8B; }
+        .low {color: blue; font-weight: 600;}
+        .high {color: red; font-weight: 600;}
+        .number { color: #FFD700; }
+        .labs { color: #008B8B; }
+        .tagline { color: #FFD700; font-size: 14px; font-style: italic; margin-bottom: 10px; }
+        /* .barcode { width: 150px; height: 30px; background: repeating-linear-gradient(90deg, #000 0px, #000 2px, #fff 2px, #fff 4px); } */
+        /* .contact-info { text-align: right; font-size: 11px; line-height: 1.6; }
+        .contact-info strong { font-weight: bold; } */
+        .patient-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; font-size: 13px; }
+        .info-row { display: flex; padding: 5px 0; }
+        .info-label { font-weight: bold; width: 140px; }
+        .info-value { flex: 1; }
+        .right-align { text-align: right; }
+        .report-title { text-align: center; font-weight: bold; font-size: 16px; margin: 20px 0 10px 0; margin-top: 10px; padding-top: 10px; border-top: 2px solid #333; }
+        .section-title { text-align: center; font-weight: bold; font-size: 16px; margin: 7px 0; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 2px solid #333; }
+        .title { text-align: center; font-weight: bold; font-size: 16px; margin: 7px 0; margin-top: 10px; padding-top: 10px; border-top: 2px solid #333; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12px; }
+        th { background: #f0f0f0; padding: 10px; text-align: left; font-weight: bold; border: 1px solid #ddd; }
+        td { padding: 8px 10px; border: 1px solid #ddd; }
+        .category-row { font-weight: bold; background: #f9f9f9; }
+        .abnormal { color: #d32f2f; font-weight: bold; }
+        .footer { margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; padding-top: 20px; }
+        .qr-code { width: 80px; height: 80px; background: #000; position: relative; }
+        .qr-code::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px;
+            background: repeating-linear-gradient(0deg, #fff 0px, #fff 3px, #000 3px, #000 6px),
+                        repeating-linear-gradient(90deg, #fff 0px, #fff 3px, #000 3px, #000 6px); }
+        .qr-label { text-align: center; font-size: 11px; margin-top: 5px; font-weight: bold; }
+        .signature-section { text-align: right; }
+        .signature { font-family: 'Brush Script MT', cursive; font-size: 24px; margin-bottom: 5px; }
+        .doctor-name { font-weight: bold; font-size: 13px; }
+        .designation { font-size: 12px; color: #666; }
+        .note-footer { background: #008B8B; color: white; padding: 10px 15px; margin-top: 20px; font-size: 11px; font-style: italic; }
+        .end-report { text-align: center; margin: 20px 0; font-weight: bold; font-size: 12px; }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
-        <header>
-            <div class="logo-section">
-                <div class="logo-text">
-                    <span class="path">Zalgo</span><span class="number">24</span>
-                </div>
-                <div class="tagline">Your health guard</div>
-                <div style="color: #008B8B; font-weight: bold; margin-top: 5px;">Labs</div>
-            </div>
-            <div class="lab-details">
-                <div><strong>Main Lab :</strong> 14, Geeta Colony, Near Natyakala Mandir</div>
-                <div>Hospital Road, Lashkar, Gwalior - 474009 (M.P.)</div>
-                <div><strong>Customer Care :</strong> 91119-02424, 0751-4712424</div>
-                <div><strong>Reference Lab :</strong> 31, Jaora Compound, In Front of M.Y. Hospital, Gala No. 2, Indore (M.P.)</div>
-                <div><strong>E-mail:</strong> path24labsgwl@gmail.com</div>
-                <div><strong>Web:</strong> www.path24labs.com</div>
-            </div>
-        </header>
+       <div class="header">
+    <div class="logo-section">
+        <div class="logo">
+            <img style="width: 200px" src="{{ asset('storage/' . auth()->user()->logo) }}" alt="">
+        </div>
+        <div class="barcode"></div>
+    </div>
+
+    <div class="right-block">
+        <div class="divider"></div>
+
+        <div class="contact-info">
+            <div><strong>Main Lab:</strong> {{ auth()->user()?->address ?? 'shubhas puri ghasmandi, kilagate, gwalior' }}</div>
+            <div><strong>Customer Care:</strong> {{ auth()->user()?->mobile ?? '7974056842' }}</div>
+            <div><strong>Reference Lab:</strong> {{ auth()->user()?->reference_lab ?? '31, Jaora Compound' }}</div>
+            <div>In Front of M.Y. Hospital, Gate No. 2, Indore (M.P.)</div>
+            <div><strong>Email:</strong> {{ auth()->user()?->email ?? 'info@lab.com' }}</div>
+            <div><strong>Web:</strong> {{ auth()->user()?->website ?? 'www.lab.com' }}</div>
+        </div>
+    </div>
+</div>
+
+
 
         <!-- Patient Info -->
         <div class="patient-info">
-            <div class="info-grid">
-                <div class="info-item"><span class="info-label">Patient Name</span><span class="info-value">: {{ $report->patient_name ?? 'N/A' }}</span></div>
-                <div class="info-item"><span class="info-label">Sam.Registered At</span><span class="info-value">: {{ \Carbon\Carbon::parse($report->created_at)->format('d/m/Y h:i A') ?? '-' }}</span></div>
-                <div class="info-item"><span class="info-label">Age</span><span class="info-value">: {{ $report->age ?? '-' }}Y / {{ strtoupper($report->gender ?? 'N/A') }}</span></div>
-                <div class="info-item"><span class="info-label">Reported At</span><span class="info-value">: {{ \Carbon\Carbon::parse($report->test_date)->format('d/m/Y h:i A') ?? '-' }}</span></div>
-                <div class="info-item"><span class="info-label">Referred By</span><span class="info-value">: {{ $report->referred_by ?? 'SELF' }}</span></div>
-                <div class="info-item"><span class="info-label">Client Name</span><span class="info-value">: {{ $report->client_name ?? 'N/A' }}</span></div>
+            <div>
+                <div class="info-row"><span class="info-label">Lab Code</span><span class="info-value">: <strong>{{ auth()->user()->lab_code ?? '-' }}</strong></span></div>
+                <div class="info-row"><span class="info-label">Patient Name</span><span class="info-value">: <strong>{{ strtoupper($report->patient_name ?? '-') }}</strong></span></div>
+                <div class="info-row"><span class="info-label">Age</span><span class="info-value">: <strong>{{ $report->age ?? '-' }}</strong> / {{ strtoupper($report->gender ?? '-') }}</span></div>
+                <div class="info-row"><span class="info-label">Referred By</span><span class="info-value">: <strong>{{ strtoupper($report->referred_by ?? 'SELF') }}</strong></span></div>
+                <div class="info-row"><span class="info-label">Client Name</span><span class="info-value">: <strong>{{ strtoupper($report->client_name ?? '-') }}</strong></span></div>
+            </div>
+            <div class="right-align">
+                <div class="info-row"><span class="info-label">Sam.Registered At</span><span class="info-value">: {{ \Carbon\Carbon::parse($report->collection_date ?? '')->format('d/m/Y h:i A') }}</span></div>
+                <div class="info-row"><span class="info-label">Reported At</span><span class="info-value">: {{ \Carbon\Carbon::parse($report->reporting_date ?? '')->format('d/m/Y h:i A') }}</span></div>
             </div>
         </div>
+        <!-- Report Title -->
 
-        <!-- Multiple Tests -->
-        @foreach($report->report_tests as $test)
-            <div class="test-header">
-                <h2>{{ strtoupper($test->panel?->name ?? 'HEALTH GUARD GOLD') }}</h2>
-                <h3>{{ strtoupper($test->test_name ?? 'LABORATORY TEST') }}</h3>
-            </div>
+<div class="title">
+{{ optional(\App\Models\Lab::find(auth()->user()?->lab_id))->name ?? 'Authorized Signatory' }}
 
-            <table class="results-table">
-                <thead>
-                    <tr>
-                        <th>Test Parameter</th>
-                        <th>Result</th>
-                        <th>Unit</th>
-                        <th>Reference Range</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($test->results as $result)
-                        @php
-                            $referenceRange = $result->reference_range ?? '';
-                            $value = floatval($result->value ?? 0);
-                            $status = 'normal';
-                            if (preg_match('/(\d+\.?\d*)\s*-\s*(\d+\.?\d*)/', $referenceRange, $matches)) {
-                                $min = floatval($matches[1]);
-                                $max = floatval($matches[2]);
-                                if ($value < $min) { $status = 'low'; }
-                                elseif ($value > $max) { $status = 'high'; }
-                            }
-                        @endphp
-                        <tr>
-                            <td>{{ $result->parameter_name ?? 'N/A' }}</td>
-                            <td><span class="result-{{ $status }}">{{ $result->value ?? '-' }}</span></td>
-                            <td>{{ $result->unit ?? '-' }}</td>
-                            <td>{{ $result->reference_range ?? '-' }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #64748b; font-style: italic;">No results available</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        @endforeach
+</div>
 
-        <!-- Remarks -->
-        @if(!empty($report->remarks))
-        <div class="remarks-section">
-            <span class="label">Remarks:</span>
-            <span class="value">{{ $report->remarks }}</span>
-        </div>
+    {{-- <div class="report-title">{{ strtoupper($report->report_name ?? '-') }}</div> --}}
+
+    {{-- <div class="section-title">{{ $result->category_name }}</div> --}}
+     @if($report->results->isNotEmpty())
+@php
+    $firstResult = $report->results->first();
+
+    // Safely extract values using optional() to avoid errors
+    $categoryName = optional(optional($firstResult)->test->category)->name
+        ?? $firstResult->category_name
+        ?? null;
+
+    $panelName = optional($report->panel)->name;
+    $testName = optional(optional($firstResult)->test)->name;
+@endphp
+
+<div class="section-title">
+    @if(!empty($panelName))
+        {{-- 🩺 If Panel exists, show only Panel (highest priority) --}}
+        {{ $panelName }}
+    @elseif(!empty($testName))
+        {{-- 🧪 If no panel but Test exists, show the Test --}}
+        {{ $testName }}
+    @elseif(!empty($categoryName))
+        {{-- 📂 If only Category exists, show the Category --}}
+        {{ $categoryName }}
+    @else
+        {{-- (Optional) Default fallback --}}
+        Uncategorized
+    @endif
+</div>
+
+
+@endif
+
+
+
+        <!-- Dynamic Test Table -->
+  <table>
+    <thead>
+        <tr>
+            <th>Test Name</th>
+            <th>Result</th>
+            <th>Unit</th>
+            <th>Biological Reference Interval</th>
+        </tr>
+    </thead>
+    <tbody>
+      @php
+    $currentCategory = null;
+@endphp
+
+@foreach($report->results as $result)
+    @php
+        $categoryName = $result->test->category->name ?? $result->category_name ?? 'Uncategorized';
+    @endphp
+
+    {{-- ✅ When category changes, show its title --}}
+    @if($categoryName !== $currentCategory)
+        @if($currentCategory !== null)
+            {{-- ✅ Show Interpretation & Comment for previous category --}}
+            @php
+                $categoryTest = \App\Models\Test::whereHas('category', function($q) use ($currentCategory) {
+                    $q->where('name', $currentCategory);
+                })->first();
+            @endphp
+
+            @if(!empty($categoryTest?->interpretation) || !empty($categoryTest?->comment))
+                <tr>
+                    <td colspan="4" style="padding-top:10px;">
+                        <div class="interpretation-section">
+                            @if(!empty($categoryTest?->interpretation))
+                                <strong>Interpretation :</strong>
+                                <p>{{ $categoryTest->interpretation }}</p>
+                            @endif
+
+                            @if(!empty($categoryTest?->comment))
+                                <strong>Comment :</strong>
+                                <p>{{ $categoryTest->comment }}</p>
+                            @endif
+                        </div>
+                    </td>
+                </tr>
+            @endif
         @endif
 
-        <!-- End of Report -->
-        <div class="end-report">
-            ------------ END OF REPORT ------------
+        {{-- Start new category --}}
+        {{-- <tr class="category-row">
+            <td colspan="4">{{ strtoupper($categoryName) }}</td>
+        </tr> --}}
+
+        @php $currentCategory = $categoryName; @endphp
+    @endif
+
+    {{-- Normal test row --}}
+    @php
+        $value = floatval($result->value);
+        $range = trim($result->reference_range);
+        $color = 'black';
+
+        if ($range && is_numeric($value)) {
+            if (preg_match_all('/\d+(?:\.\d+)?/', $range, $matches) && count($matches[0]) >= 2) {
+                $min = floatval($matches[0][0]);
+                $max = floatval($matches[0][1]);
+                if ($value < $min) $color = 'blue';
+                elseif ($value > $max) $color = 'red';
+            } elseif (preg_match('/>\s*(\d+(?:\.\d+)?)/', $range, $m)) {
+                if ($value <= floatval($m[1])) $color = 'blue';
+            } elseif (preg_match('/<\s*(\d+(?:\.\d+)?)/', $range, $m)) {
+                if ($value >= floatval($m[1])) $color = 'red';
+            }
+        }
+    @endphp
+
+    <tr>
+        <td>{{ $result->test_name }}</td>
+        <td style="color: {{ $color }}">{{ $result->value ?? '-' }}</td>
+        <td>{{ $result->unit ?? '-' }}</td>
+        <td>{{ $result->reference_range ?? '-' }}</td>
+    </tr>
+@endforeach
+
+{{-- ✅ After loop ends, show last category interpretation --}}
+@if($currentCategory !== null)
+    @php
+        $categoryTest = \App\Models\Test::whereHas('category', function($q) use ($currentCategory) {
+            $q->where('name', $currentCategory);
+        })->first();
+    @endphp
+
+    @if(!empty($categoryTest?->interpretation) || !empty($categoryTest?->comment))
+        <tr>
+            <td colspan="4" style="padding-top:10px;">
+                <div class="interpretation-section">
+                    @if(!empty($categoryTest?->interpretation))
+                        <strong>Interpretation :</strong>
+                        <p>{{ $categoryTest->interpretation }}</p>
+                    @endif
+
+                    @if(!empty($categoryTest?->comment))
+                        <strong>Comment :</strong>
+                        <p>{{ $categoryTest->comment }}</p>
+                    @endif
+                </div>
+            </td>
+        </tr>
+    @endif
+@endif
+
+    </tbody>
+</table>
+
+
+
+
+        <div class="end-report">------------- END OF REPORT ---------------</div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div>
+                <div class="qr-code"></div>
+                <div class="qr-label">Scan to Validate</div>
+            </div>
+            <div class="signature-section">
+                @if(auth()->user()->digital_signature)
+    <div class="signature" style="margin-top: 20px;">
+        <img
+            src="{{ asset('storage/' . auth()->user()->digital_signature) }}"
+            alt="Signature"
+            style="width: 150px; height: auto;"
+        >
+    </div>
+@else
+    <p><em>No signature available</em></p>
+@endif
+{{-- {{ asset('storage/' . auth()->user()->logo) }} --}}
+                <div class="doctor-name">{{ auth()->user()?->name ?? 'Authorized Signatory' }}</div>
+                <div class="designation"> {{ auth()->user()?->qualification ?? 'Medical Director' }}</div>
+            </div>
         </div>
+
+        <div class="note-footer">
+            @if(auth()->user()?->address)
+                    <strong>Note:</strong> {{ auth()->user()->note }}
+                @endif
+        </div>
+
     </div>
 </body>
 </html>

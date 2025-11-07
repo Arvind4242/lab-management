@@ -13,11 +13,21 @@ class AdminOnly
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
-    {
-         if (!auth()->check() || !auth()->user()->hasRole('admin')) {
-            abort(403, 'Unauthorized');
-        }
-        return $next($request);
+  public function handle(Request $request, Closure $next): Response
+{
+    if (!auth()->check()) {
+        abort(403, 'Unauthorized');
     }
+
+    $role = auth()->user()->role;
+
+    // Allow both admin and user
+    if (!in_array($role, ['admin', 'user'])) {
+        abort(403, 'Unauthorized');
+    }
+
+    return $next($request);
+}
+
+
 }
