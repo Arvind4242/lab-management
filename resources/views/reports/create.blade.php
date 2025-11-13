@@ -63,28 +63,56 @@
                 </div>
             </div>
 
-            <!-- Test Panel Selection -->
+            <!-- Test Category & Panel Selection -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-success bg-gradient text-white">
-                    <i class="bi bi-clipboard2-pulse-fill me-2"></i>Select Test Panels & Tests
+                    <i class="bi bi-clipboard2-pulse-fill me-2"></i>Select Test Category, Panel & Tests
                 </div>
                 <div class="card-body">
-                    <label class="form-label fw-semibold">Search & Select Multiple Panels/Tests</label>
-                    <select id="test_selector" class="form-select form-select-lg" multiple>
-                        <optgroup label="📋 Test Panels">
+                    <!-- Category Filter -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-funnel-fill text-primary"></i> Filter by Test Category
+                        </label>
+                        <select id="category_filter" class="form-select form-select-lg">
+                            <option value="">🔍 All Categories</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Test Panel Selection (Single) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">📋 Select Test Panel (Optional - One Only)</label>
+                        <select id="panel_selector" class="form-select form-select-lg">
+                            <option value="">-- No Panel Selected --</option>
                             @foreach ($panels as $id => $name)
-                                <option value="panel_{{ $id }}">{{ $name }}</option>
+                                <option value="panel_{{ $id }}" data-category-id="{{ $panelCategories[$id] ?? '' }}">
+                                    {{ $name }}
+                                </option>
                             @endforeach
-                        </optgroup>
-                        <optgroup label="🧪 Individual Tests">
+                        </select>
+                        <small class="form-text text-muted mt-2 d-block">
+                            <i class="bi bi-info-circle"></i> Select one panel or choose individual tests below
+                        </small>
+                    </div>
+
+                    <!-- Individual Tests Selection (Multiple) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">🧪 Select Individual Tests (Multiple)</label>
+                        <select id="test_selector" class="form-select form-select-lg" multiple>
                             @foreach ($tests as $test)
-                                <option value="test_{{ $test->id }}">{{ $test->name }}</option>
+                                <option value="test_{{ $test->id }}" data-category-id="{{ $test->category_id ?? '' }}">
+                                    {{ $test->name }}
+                                </option>
                             @endforeach
-                        </optgroup>
-                    </select>
-                    <small class="form-text text-muted mt-2 d-block">
-                        <i class="bi bi-info-circle"></i> Type to search, select multiple items
-                    </small>
+                        </select>
+                        <small class="form-text text-muted mt-2 d-block">
+                            <i class="bi bi-info-circle"></i> Type to search, select multiple tests
+                        </small>
+                    </div>
+
                     <input type="hidden" name="test_panel_id" id="test_panel_id">
 
                     <!-- Selected Items Display -->
@@ -244,6 +272,10 @@ body {
     animation: fadeIn 0.3s;
 }
 
+.selected-badge.panel-badge {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
 .selected-badge i {
     cursor: pointer;
     margin-left: 8px;
@@ -274,61 +306,174 @@ body {
 $(function() {
     const genderSelect = $('select[name="gender"]');
     const testList = $('#test-list');
+    const categoryFilter = $('#category_filter');
+    const panelSelector = $('#panel_selector');
+    const testSelector = $('#test_selector');
+
     let selectedTests = new Map(); // Store unique tests by ID
+    let selectedPanel = null;
 
-    // Initialize Select2 with search
-   $('#test_selector').select2({
-    theme: 'bootstrap-5',
-    placeholder: '🔍 Search and select one panel or test...',
-    allowClear: true,
-    closeOnSelect: true, // Close after selecting one
-    width: '100%'
-}).on('select2:select', function (e) {
-    // Ensure only one selection at a time
-    let selectedValue = e.params.data.id;
-    $('#test_selector').val([selectedValue]).trigger('change');
-});
+    // Store original options
+    let originalPanelOptions = panelSelector.html();
+    let originalTestOptions = testSelector.html();
 
-    // Handle selection
-    $('#test_selector').on('change', function() {
-    let selectedValues = $(this).val() || [];
-    updateSelectedBadges(selectedValues);
-    loadAllSelectedTests(selectedValues);
+    // Initialize Select2 for test selector
+    testSelector.select2({
+        theme: 'bootstrap-5',
+        placeholder: '🔍 Search and select multiple tests...',
+        allowClear: true,
+        width: '100%'
+    });
 
-    // ✅ Update hidden test_panel_id
-    let panelIds = selectedValues
-        .filter(v => v.startsWith('panel_'))
-        .map(v => v.replace('panel_', ''));
-    $('#test_panel_id').val(panelIds.length ? panelIds.join(',') : '');
-});
+    // Initialize Select2 for panel selector
+    panelSelector.select2({
+        theme: 'bootstrap-5',
+        placeholder: '-- No Panel Selected --',
+        allowClear: true,
+        width: '100%'
+    });
 
+    // Category filter logic
+    categoryFilter.on('change', function() {
+        const selectedCategory = $(this).val();
+
+        // Clear current selections if category changes
+        panelSelector.val(null);
+        testSelector.val(null);
+        selectedPanel = null;
+
+        // Restore original options
+        let $tempPanel = $('<select>').html(originalPanelOptions);
+        let $tempTest = $('<select>').html(originalTestOptions);
+
+        // Filter and rebuild panel options
+        let panelOptions = '<option value="">-- No Panel Selected --</option>';
+        $tempPanel.find('option').each(function() {
+            if ($(this).val() === '') return;
+
+            const categoryId = $(this).data('category-id');
+            const categoryIdStr = String(categoryId);
+            const selectedCategoryStr = String(selectedCategory);
+
+            if (selectedCategory === '' || categoryIdStr === selectedCategoryStr) {
+                panelOptions += this.outerHTML;
+            }
+        });
+
+        // Filter and rebuild test options
+        let testOptions = '';
+        $tempTest.find('option').each(function() {
+            const categoryId = $(this).data('category-id');
+            const categoryIdStr = String(categoryId);
+            const selectedCategoryStr = String(selectedCategory);
+
+            if (selectedCategory === '' || categoryIdStr === selectedCategoryStr) {
+                testOptions += this.outerHTML;
+            }
+        });
+
+        // Destroy existing Select2 instances
+        if (panelSelector.hasClass("select2-hidden-accessible")) {
+            panelSelector.select2('destroy');
+        }
+        if (testSelector.hasClass("select2-hidden-accessible")) {
+            testSelector.select2('destroy');
+        }
+
+        // Update HTML
+        panelSelector.html(panelOptions);
+        testSelector.html(testOptions);
+
+        // Reinitialize Select2
+        panelSelector.select2({
+            theme: 'bootstrap-5',
+            placeholder: '-- No Panel Selected --',
+            allowClear: true,
+            width: '100%'
+        });
+
+        testSelector.select2({
+            theme: 'bootstrap-5',
+            placeholder: '🔍 Search and select multiple tests...',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Update badges and test list
+        updateSelectedBadges();
+        renderAllTests();
+    });
+
+    // Handle panel selection
+    panelSelector.on('change', function() {
+        const panelValue = $(this).val();
+
+        if (panelValue) {
+            selectedPanel = panelValue;
+            // Clear individual test selections when panel is selected
+            testSelector.val(null).trigger('change');
+        } else {
+            selectedPanel = null;
+        }
+
+        updateSelectedBadges();
+        loadAllSelectedTests();
+    });
+
+    // Handle individual test selection
+    testSelector.on('change', function() {
+        updateSelectedBadges();
+        loadAllSelectedTests();
+    });
 
     // Display selected items as badges
-    function updateSelectedBadges(selectedValues) {
+    function updateSelectedBadges() {
         let badgesHtml = '';
-        selectedValues.forEach(val => {
-            let text = $('#test_selector option[value="' + val + '"]').text();
-            let icon = val.startsWith('panel_') ? '📋' : '🧪';
+
+        // Show panel badge if selected
+        if (selectedPanel) {
+            let text = panelSelector.find('option:selected').text();
+            badgesHtml += `
+                <span class="selected-badge panel-badge">
+                    📋 ${text}
+                    <i class="bi bi-x-circle" onclick="removePanel()"></i>
+                </span>
+            `;
+        }
+
+        // Show individual test badges
+        const selectedTestValues = testSelector.val() || [];
+        selectedTestValues.forEach(val => {
+            let text = testSelector.find('option[value="' + val + '"]').text();
             badgesHtml += `
                 <span class="selected-badge">
-                    ${icon} ${text}
-                    <i class="bi bi-x-circle" onclick="removeSelection('${val}')"></i>
+                    🧪 ${text}
+                    <i class="bi bi-x-circle" onclick="removeTest('${val}')"></i>
                 </span>
             `;
         });
+
         $('#selected-items').html(badgesHtml || '<p class="text-muted mb-0"><i class="bi bi-info-circle"></i> No items selected</p>');
     }
 
-    // Remove selection
-    window.removeSelection = function(value) {
-        let currentVals = $('#test_selector').val() || [];
+    // Remove panel selection
+    window.removePanel = function() {
+        selectedPanel = null;
+        panelSelector.val(null).trigger('change');
+    };
+
+    // Remove individual test
+    window.removeTest = function(value) {
+        let currentVals = testSelector.val() || [];
         currentVals = currentVals.filter(v => v !== value);
-        $('#test_selector').val(currentVals).trigger('change');
+        testSelector.val(currentVals).trigger('change');
     };
 
     // Load all selected tests
-    function loadAllSelectedTests(selectedValues) {
-        if (selectedValues.length === 0) {
+    function loadAllSelectedTests() {
+        const selectedTestValues = testSelector.val() || [];
+
+        if (!selectedPanel && selectedTestValues.length === 0) {
             selectedTests.clear();
             renderAllTests();
             return;
@@ -337,14 +482,20 @@ $(function() {
         testList.html('<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary" role="status"></div> Loading tests...</td></tr>');
 
         let promises = [];
-        selectedValues.forEach(val => {
-            if (val.startsWith('panel_')) {
-                let panelId = val.replace('panel_', '');
-                promises.push($.get(`/reports/panel-tests/${panelId}`));
-            } else if (val.startsWith('test_')) {
-                let testId = val.replace('test_', '');
-                promises.push($.get(`/reports/test/${testId}`).then(test => [test]));
-            }
+
+        // Load panel tests if panel is selected
+        if (selectedPanel) {
+            let panelId = selectedPanel.replace('panel_', '');
+            promises.push($.get(`/reports/panel-tests/${panelId}`));
+            $('#test_panel_id').val(panelId);
+        } else {
+            $('#test_panel_id').val('');
+        }
+
+        // Load individual tests
+        selectedTestValues.forEach(val => {
+            let testId = val.replace('test_', '');
+            promises.push($.get(`/reports/test/${testId}`).then(test => [test]));
         });
 
         Promise.all(promises).then(results => {
@@ -447,7 +598,10 @@ $(function() {
     $('#clearBtn').on('click', function() {
         if (confirm('Are you sure you want to clear all data?')) {
             $('#reportForm')[0].reset();
-            $('#test_selector').val(null).trigger('change');
+            categoryFilter.val('').trigger('change');
+            panelSelector.val(null).trigger('change');
+            testSelector.val(null).trigger('change');
+            selectedPanel = null;
             selectedTests.clear();
             renderAllTests();
         }
@@ -466,7 +620,10 @@ $(function() {
     // Reset after success
     @if(session('success'))
         $('#reportForm')[0].reset();
-        $('#test_selector').val(null).trigger('change');
+        categoryFilter.val('').trigger('change');
+        panelSelector.val(null).trigger('change');
+        testSelector.val(null).trigger('change');
+        selectedPanel = null;
         selectedTests.clear();
         renderAllTests();
         $('html, body').animate({ scrollTop: 0 }, 'smooth');

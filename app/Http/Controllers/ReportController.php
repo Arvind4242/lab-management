@@ -2,22 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Test;
 use App\Models\Report;
 use App\Models\TestPanel;
+use App\Models\TestCategory;
 use Illuminate\Http\Request;
 use PDF;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class ReportController extends Controller
 {
 
- public function create()
-    {
-        $panels = TestPanel::pluck('name', 'id');
-        $tests = \App\Models\Test::select('id', 'name')->get(); // 👈 added
-    return view('reports.create', compact('panels', 'tests'));
-    }
+public function create()
+{
+    $categories = TestCategory::all();
+    $panels = TestPanel::pluck('name', 'id');
+    $panelCategories = TestPanel::pluck('category_id', 'id'); // Map panel ID to category ID
+    $tests = Test::all();
+
+    return view('reports.create', compact('categories', 'panels', 'panelCategories', 'tests'));
+}
 
     // AJAX: fetch tests from a panel
     public function getPanelTests($panelId)
@@ -89,16 +95,27 @@ class ReportController extends Controller
     }
 
 
-   public function edit(Report $report)
+//    public function edit(Report $report)
+// {
+//     // Load all related results with their tests and units (if available)
+//     $report->load(['report_results.report_test', 'report_results.report_test.test_unit']);
+
+//     // Get all test panels for the dropdown
+//     $panels = \App\Models\TestPanel::pluck('name', 'id');
+
+//     // Pass both report and panels to the view
+//     return view('reports.edit', compact('report', 'panels'));
+// }
+
+public function edit($id)
 {
-    // Load all related results with their tests and units (if available)
-    $report->load(['report_results.report_test', 'report_results.report_test.test_unit']);
+    $report = Report::with('report_results.test')->findOrFail($id);
+    $categories = TestCategory::all();
+    $panels = TestPanel::pluck('name', 'id');
+    $panelCategories = TestPanel::pluck('category_id', 'id')->toArray();
+    $tests = Test::all();
 
-    // Get all test panels for the dropdown
-    $panels = \App\Models\TestPanel::pluck('name', 'id');
-
-    // Pass both report and panels to the view
-    return view('reports.edit', compact('report', 'panels'));
+    return view('reports.edit', compact('report', 'categories', 'panels', 'panelCategories', 'tests'));
 }
 
 
@@ -160,22 +177,32 @@ public function testView($reportId)
 }
 
     // 📄 Download report as PDF
-    public function download(Report $report)
-    {
-        $pdf = PDF::loadView('reports.print', compact('report'));
-        return $pdf->download('Lab_Report_' . $report->id . '.pdf');
-    }
+ public function download(Report $report)
+{
+    $patientName = $report->patient->name ?? 'Unknown_Patient';
+    $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $patientName);
+
+    $pdf = \PDF::loadView('reports.print', compact('report'))
+        ->setPaper('a4')
+        ->setOption('margin-top', 5)
+        ->setOption('margin-bottom', 5)
+        ->setOption('margin-left', 5)
+        ->setOption('margin-right', 5);
+
+    return $pdf->download($safeName . '_report.pdf');
+}
+
 
 //    public function download(Report $report)
 // {
-//     $pdf = PDF::loadView('reports.print', compact('report'))
-//               ->setPaper('A4', 'portrait')
-//               ->setOptions([
-//                   'dpi' => 150,
-//                   'defaultFont' => 'DejaVu Sans',
-//                   'isHtml5ParserEnabled' => true,
-//                   'isRemoteEnabled' => true,
-//               ]);
+    // $pdf = PDF::loadView('reports.print', compact('report'))
+    //           ->setPaper('A4', 'portrait')
+    //           ->setOptions([
+    //               'dpi' => 150,
+    //               'defaultFont' => 'DejaVu Sans',
+    //               'isHtml5ParserEnabled' => true,
+    //               'isRemoteEnabled' => true,
+    //           ]);
 
 //     return $pdf->download('Lab_Report_' . $report->id . '.pdf');
 // }

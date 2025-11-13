@@ -40,7 +40,8 @@ public static function form(Form $form): Form
                 ->label('Category')
                 ->relationship('category', 'name')
                 ->required(),
-
+            Forms\Components\TextInput::make('test_group')
+                ->maxLength(255),
             Forms\Components\Select::make('unit_id')
                 ->label('Unit')
                 ->relationship('unit', 'name')
