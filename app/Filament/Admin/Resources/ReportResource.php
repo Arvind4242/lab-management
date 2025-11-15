@@ -1,30 +1,21 @@
 <?php
 
 namespace App\Filament\Admin\Resources;
+
 use Filament\Tables\Filters\SelectFilter;
 use App\Filament\Admin\Resources\ReportResource\Pages;
 use App\Filament\Admin\Resources\ReportResource\RelationManagers\ResultsRelationManager;
 use App\Models\Report;
 use App\Models\Test;
-use App\Models\Lab;
-use App\Models\User;
 use App\Models\TestPanel;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Forms\Components\Grid;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\TrashedFilter;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\HasManyRepeater;
-use Filament\Forms\Components\Repeater;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 
 class ReportResource extends Resource
 {
@@ -33,70 +24,64 @@ class ReportResource extends Resource
     protected static ?string $navigationLabel = 'Reports';
     protected static ?string $pluralModelLabel = 'Reports';
     protected static ?string $modelLabel = 'Report';
-    // protected static ?string $navigationGroup = 'Lab Management';
-
-
-
-
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Section::make('Patient Details')
-    ->schema([
-        Forms\Components\TextInput::make('patient_name')
-            ->required()
-            ->label('Patient Name'),
+                    ->schema([
+                        Forms\Components\TextInput::make('patient_name')
+                            ->required()
+                            ->label('Patient Name'),
 
-        Forms\Components\TextInput::make('patient_id')
-            ->label('Patient ID'),
+                        Forms\Components\TextInput::make('patient_id')
+                            ->label('Patient ID'),
 
-        Forms\Components\Select::make('gender')
-            ->options([
-                'Male' => 'Male',
-                'Female' => 'Female',
-                'Other' => 'Other',
-            ])
-            ->required()
-            ->label('Gender')
-            ->reactive()
-            ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                $tests = $get('tests') ?? [];
-                foreach ($tests as &$test) {
-                    $test['reference_range'] =
-                        $state === 'Female'
-                            ? $test['reference_range_female']
-                            : ($state === 'Other'
-                                ? $test['reference_range_other']
-                                : $test['reference_range_male']);
-                }
-                $set('tests', $tests);
-            }),
+                        Forms\Components\Select::make('gender')
+                            ->options([
+                                'Male' => 'Male',
+                                'Female' => 'Female',
+                                'Other' => 'Other',
+                            ])
+                            ->required()
+                            ->label('Gender')
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                $tests = $get('tests') ?? [];
+                                foreach ($tests as $key => &$test) {
+                                    if (isset($test['reference_range_male'], $test['reference_range_female'], $test['reference_range_other'])) {
+                                        $test['reference_range'] =
+                                            $state === 'Female'
+                                                ? $test['reference_range_female']
+                                                : ($state === 'Other'
+                                                    ? $test['reference_range_other']
+                                                    : $test['reference_range_male']);
+                                    }
+                                }
+                                $set('tests', $tests);
+                            }),
 
-        Forms\Components\TextInput::make('age')
-            ->numeric()
-            ->label('Age (Years)'),
+                        Forms\Components\TextInput::make('age')
+                            ->numeric()
+                            ->label('Age (Years)'),
 
-        Forms\Components\DatePicker::make('test_date')
-            ->required()
-            ->label('Test Date')
-            ->dehydrated(true),
-    ])
-    ->columns(2),
+                        Forms\Components\DatePicker::make('test_date')
+                            ->required()
+                            ->label('Test Date')
+                            ->default(now())
+                            ->dehydrated(true),
+                    ])
+                    ->columns(2),
 
-    Forms\Components\Section::make('Test Info')
-    ->schema([
-        Forms\Components\DatePicker::make('test_date')
-            ->required()
-            ->label('Test Date'),
-        Forms\Components\TextInput::make('referred_by')
-            ->label('Referred By'),
-        Forms\Components\TextInput::make('client_name')
-            ->label('Client Name'),
-    ])
-    ->columns(3),
-
+                Forms\Components\Section::make('Additional Info')
+                    ->schema([
+                        Forms\Components\TextInput::make('referred_by')
+                            ->label('Referred By'),
+                        Forms\Components\TextInput::make('client_name')
+                            ->label('Client Name'),
+                    ])
+                    ->columns(2),
 
                 Forms\Components\Section::make('Panel / Test Selection')
                     ->schema([
@@ -115,8 +100,8 @@ class ReportResource extends Resource
                                 }
                                 return $options;
                             })
-                            ->reactive()
-                            ->afterStateUpdated(function ($state, callable $set) {
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 if (!$state) {
                                     $set('tests', []);
                                     $set('test_panel_id', null);
@@ -142,42 +127,35 @@ class ReportResource extends Resource
                                             } else {
                                                 $testIds = array_filter(explode(',', $testData));
                                             }
-                                        } else {
-                                            $testIds = [];
                                         }
                                     }
-
-
-                                    \Log::info('Selected panel', [
-                                        'panel_id' => $panelId,
-                                        'test_ids' => $testIds,
-                                    ]);
 
                                     $tests = Test::whereIn('id', $testIds)->with('unit')->get();
                                 } else {
                                     $testId = Str::replaceFirst('test_', '', $state);
                                     $set('test_panel_id', null);
                                     $tests = Test::where('id', $testId)->with('unit')->get();
-
-                                    \Log::info('Selected single test', ['test_id' => $testId]);
                                 }
 
-                                \Log::info('Fetched tests', ['tests' => $tests->toArray()]);
+                                $gender = $get('gender') ?? 'Male';
 
-                                $set('tests', $tests->map(function ($test) {
-                                return [
-                                    'test_id' => $test->id,
-                                    'test_name' => $test->name,
-                                    'unit' => $test->unit?->name ?? '',
-                                    'reference_range_male' => $test->default_result ?? '',
-                                    'reference_range_female' => $test->default_result_female ?? '',
-                                    'reference_range_other' => $test->default_result_other ?? '',
-                                    'reference_range' => $test->default_result ?? '',
-                                    'value' => null,
-                                    'is_out_of_range' => false,
-                                ];
-                            })->toArray());
-
+                                $set('tests', $tests->map(function ($test) use ($gender) {
+                                    return [
+                                        'test_id' => $test->id,
+                                        'test_name' => $test->name,
+                                        'unit' => $test->unit?->name ?? '',
+                                        'reference_range_male' => $test->default_result ?? '',
+                                        'reference_range_female' => $test->default_result_female ?? '',
+                                        'reference_range_other' => $test->default_result_other ?? '',
+                                        'reference_range' => $gender === 'Female'
+                                            ? ($test->default_result_female ?? '')
+                                            : ($gender === 'Other'
+                                                ? ($test->default_result_other ?? '')
+                                                : ($test->default_result ?? '')),
+                                        'value' => null,
+                                        'is_out_of_range' => false,
+                                    ];
+                                })->toArray());
                             }),
                     ]),
 
@@ -188,166 +166,121 @@ class ReportResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('test_name')
                                     ->disabled()
-                                    ->dehydrated(true),
+                                    ->dehydrated(true)
+                                    ->columnSpan(2),
 
                                 Forms\Components\TextInput::make('value')
                                     ->label('Result Value')
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get, $context) {
-                                        $gender = $get('gender') ?? 'Male';
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        $gender = $get('../../gender') ?? 'Male';
                                         $range = $gender === 'Female'
-                                            ? $get('reference_range_female')
+                                            ? ($get('reference_range_female') ?? '')
                                             : ($gender === 'Other'
-                                                ? $get('reference_range_other')
-                                                : $get('reference_range_male'));
+                                                ? ($get('reference_range_other') ?? '')
+                                                : ($get('reference_range_male') ?? ''));
 
                                         $set('is_out_of_range', false);
 
-                                        if (is_numeric($state) && preg_match('/(\d+\.?\d*)\s*-\s*(\d+\.?\d*)/', $range, $m)) {
+                                        if (is_numeric($state) && !empty($range) && preg_match('/(\d+\.?\d*)\s*-\s*(\d+\.?\d*)/', $range, $m)) {
                                             $min = (float) $m[1];
                                             $max = (float) $m[2];
                                             $set('is_out_of_range', $state < $min || $state > $max);
                                         }
-                                    }),
+                                    })
+                                    ->columnSpan(2),
 
                                 Forms\Components\TextInput::make('unit')
                                     ->disabled()
-                                    ->label('Unit'),
+                                    ->label('Unit')
+                                    ->columnSpan(1),
 
                                 Forms\Components\TextInput::make('reference_range')
                                     ->disabled()
-                                    ->label('Reference Range'),
+                                    ->label('Reference Range')
+                                    ->columnSpan(2),
 
                                 Forms\Components\Toggle::make('is_out_of_range')
                                     ->label('Out of Range')
-                                    ->disabled(),
+                                    ->disabled()
+                                    ->columnSpan(1),
                             ])
-                            ->columns(5)
+                            ->columns(8)
+                            ->reorderable()
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['test_name'] ?? null)
                             ->default([]),
                     ]),
             ]);
     }
 
     public static function table(Table $table): Table
-{
-    return $table
-        ->columns([
-            // 👇 Serial number column
-            Tables\Columns\TextColumn::make('serial_number')
-                ->label('Sl. No.')
-                ->rowIndex()
-                ->alignCenter(),
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('serial_number')
+                    ->label('Sl. No.')
+                    ->rowIndex(),
 
-            Tables\Columns\TextColumn::make('patient_name')
-                ->label('Patient Name')
-                ->sortable()
-                ->searchable(),
+                Tables\Columns\TextColumn::make('patient_name')
+                    ->label('Patient Name')
+                    ->sortable()
+                    ->searchable(),
 
-            Tables\Columns\TextColumn::make('age')->sortable(),
-            Tables\Columns\TextColumn::make('gender'),
-            Tables\Columns\TextColumn::make('test_date')->date(),
-            // Tables\Columns\TextColumn::make('remarks')->limit(30),
-            Tables\Columns\TextColumn::make('created_at')->since()->label('Created'),
-        ])
+                Tables\Columns\TextColumn::make('age')
+                    ->sortable(),
 
-  ->filters([
-    // 🗑 Optional: if you use soft deletes
-    // TrashedFilter::make(),
+                Tables\Columns\TextColumn::make('gender')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Male' => 'info',
+                        'Female' => 'success',
+                        'Other' => 'warning',
+                        default => 'gray',
+                    }),
 
-    // 🧍 Filter by Patient Name
-    Tables\Filters\Filter::make('patient_name')
-        ->label('Patient Name')
-        ->form([
-            Forms\Components\TextInput::make('patient_name')
-                ->label('Patient Name')
-                ->placeholder('Enter patient name...'),
-        ])
-        ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
-            $name = $data['patient_name'] ?? null;
-            if ($name) {
-                return $query->where('patient_name', 'like', '%' . $name . '%');
-            }
-            return $query;
-        }),
+                Tables\Columns\TextColumn::make('test_date')
+                    ->date('d M Y')
+                    ->sortable(),
 
-    // 📅 Filter by Date Range
-    Tables\Filters\Filter::make('test_date_range')
-        ->label('Date Range')
-        ->form([
-            Forms\Components\DatePicker::make('from')->label('From Date'),
-            Forms\Components\DatePicker::make('to')->label('To Date'),
-        ])
-        ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
-            $from = $data['from'] ?? null;
-            $to = $data['to'] ?? null;
-
-            if ($from && $to) {
-                return $query->whereBetween('test_date', [$from, $to]);
-            }
-            if ($from) {
-                return $query->whereDate('test_date', '>=', $from);
-            }
-            if ($to) {
-                return $query->whereDate('test_date', '<=', $to);
-            }
-            return $query;
-        }),
-
-    // 🚹 Filter by Gender
-    Tables\Filters\SelectFilter::make('gender')
-        ->label('Gender')
-        ->options([
-            'Male' => 'Gents',
-            'Female' => 'Ladies',
-            'Other' => 'Other',
-        ])
-        ->placeholder('Select Gender'),
-
-    // 👨‍💼 Filter by User (visible only to admin)
-    Tables\Filters\SelectFilter::make('user_id')
-        ->label('Created By')
-        ->options(fn() => \App\Models\User::pluck('name', 'id')->toArray() ?: [])
-        ->visible(fn() => auth()->user()?->role === 'admin'),
-
-    // 📆 Quick Day Filters
-    Tables\Filters\Filter::make('today')
-        ->label("Today's Reports")
-        ->query(fn($query) => $query->whereDate('test_date', today())),
-
-    Tables\Filters\Filter::make('yesterday')
-        ->label("Yesterday's Reports")
-        ->query(fn($query) => $query->whereDate('test_date', today()->subDay())),
-])
+                Tables\Columns\TextColumn::make('created_at')
+                    ->since()
+                    ->label('Created')
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->defaultSort('test_date', 'desc')
+            ->filters([
+                SelectFilter::make('gender')
+                    ->options([
+                        'Male' => 'Male',
+                        'Female' => 'Female',
+                        'Other' => 'Other',
+                    ]),
+            ])
+           ->actions([
+    Tables\Actions\EditAction::make(),
+    Tables\Actions\Action::make('preview')
+        ->label('Preview')
+        ->icon('heroicon-o-eye')
+        ->url(fn($record) => route('reports.print', $record))
+        ->openUrlInNewTab(),
+    Tables\Actions\Action::make('download')
+        ->label('PDF')
+        ->icon('heroicon-o-arrow-down-tray')
+        ->color('success')
+        ->url(fn($record) => route('reports.download', $record)),
+    Tables\Actions\DeleteAction::make(),
+           ]);
 
 
+    }
 
-
-        ->actions([
-            // Tables\Actions\ViewAction::make(),
-              Tables\Actions\EditAction::make()->url(fn($record) => route('reports.edit', $record)),
-            Tables\Actions\DeleteAction::make(),
-            Tables\Actions\Action::make('preview')
-                ->label('Preview')
-                ->icon('heroicon-o-eye')
-                ->url(fn($record) => route('reports.print', $record))
-                ->openUrlInNewTab(),
-            Tables\Actions\Action::make('download')
-                ->label('Download PDF')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->url(fn($record) => route('reports.download', $record)),
-        ]);
-
-        // ->bulkActions([
-        //     Tables\Actions\DeleteBulkAction::make(),
-        // ]);
-}
-
-  public static function getRelations(): array
-{
-    return [
-        ResultsRelationManager::class,
-    ];
-}
+    public static function getRelations(): array
+    {
+        return [
+            ResultsRelationManager::class,
+        ];
+    }
 
     public static function getPages(): array
     {
@@ -358,16 +291,14 @@ class ReportResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
-{
-    $query = parent::getEloquentQuery();
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
 
-    if (Auth::user()->role === 'admin') {
-        return $query; // show all
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return $query;
+        }
+
+        return $query->where('user_id', Auth::id());
     }
-
-    return $query->where('user_id', Auth::id());
-}
-
-
 }
