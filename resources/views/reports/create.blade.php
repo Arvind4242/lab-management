@@ -122,23 +122,26 @@
 
             <!-- Test Table -->
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-info bg-gradient text-white">
-                    <i class="bi bi-table me-2"></i>Test Results
+                <div class="card-header bg-info bg-gradient text-white d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-table me-2"></i>Test Results</span>
+                    <small class="badge bg-light text-dark">💡 Drag to reorder tests</small>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead class="table-dark">
                                 <tr>
-                                    <th width="30%">Test Name</th>
-                                    <th width="25%">Result Value</th>
+                                    <th width="5%"></th>
+                                    <th width="28%">Test Name</th>
+                                    <th width="22%">Result Value</th>
                                     <th width="15%">Unit</th>
-                                    <th width="30%">Reference Range</th>
+                                    <th width="25%">Reference Range</th>
+                                    <th width="5%"></th>
                                 </tr>
                             </thead>
                             <tbody id="test-list">
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-5">
+                                    <td colspan="6" class="text-center text-muted py-5">
                                         <i class="bi bi-search fs-1 d-block mb-2"></i>
                                         Select test panels or tests to begin
                                     </td>
@@ -294,6 +297,42 @@ body {
 .alert {
     border-radius: 10px;
     border: none;
+}
+
+/* Drag and Drop Styles */
+.drag-handle {
+    cursor: grab;
+    color: #6c757d;
+    font-size: 18px;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.dragging {
+    opacity: 0.5;
+    background: #e3f2fd !important;
+}
+
+.drag-over {
+    border-top: 3px solid #667eea !important;
+}
+
+.test-row {
+    transition: all 0.2s ease;
+}
+
+.remove-test-btn {
+    cursor: pointer;
+    color: #dc3545;
+    font-size: 18px;
+    transition: transform 0.2s;
+}
+
+.remove-test-btn:hover {
+    transform: scale(1.3);
+    color: #bb2d3b;
 }
 </style>
 @endpush
@@ -469,6 +508,14 @@ $(function() {
         testSelector.val(currentVals).trigger('change');
     };
 
+    // Remove test from the table
+    window.removeTestFromTable = function(testId) {
+        if (confirm('Remove this test from the report?')) {
+            selectedTests.delete(parseInt(testId));
+            renderAllTests();
+        }
+    };
+
     // Load all selected tests
     function loadAllSelectedTests() {
         const selectedTestValues = testSelector.val() || [];
@@ -479,7 +526,7 @@ $(function() {
             return;
         }
 
-        testList.html('<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary" role="status"></div> Loading tests...</td></tr>');
+        testList.html('<tr><td colspan="6" class="text-center"><div class="spinner-border text-primary" role="status"></div> Loading tests...</td></tr>');
 
         let promises = [];
 
@@ -511,14 +558,14 @@ $(function() {
             });
             renderAllTests();
         }).catch(() => {
-            testList.html('<tr><td colspan="4" class="text-center text-danger"><i class="bi bi-exclamation-triangle"></i> Error loading tests</td></tr>');
+            testList.html('<tr><td colspan="6" class="text-center text-danger"><i class="bi bi-exclamation-triangle"></i> Error loading tests</td></tr>');
         });
     }
 
-    // Render all tests
+    // Render all tests with drag and drop
     function renderAllTests() {
         if (selectedTests.size === 0) {
-            testList.html('<tr><td colspan="4" class="text-center text-muted py-5"><i class="bi bi-search fs-1 d-block mb-2"></i>Select test panels or tests to begin</td></tr>');
+            testList.html('<tr><td colspan="6" class="text-center text-muted py-5"><i class="bi bi-search fs-1 d-block mb-2"></i>Select test panels or tests to begin</td></tr>');
             return;
         }
 
@@ -532,7 +579,10 @@ $(function() {
                         : test.reference_range_other;
 
             rows += `
-                <tr data-test-id="${test.id}">
+                <tr class="test-row" draggable="true" data-test-id="${test.id}">
+                    <td class="text-center">
+                        <i class="bi bi-grip-vertical drag-handle"></i>
+                    </td>
                     <td class="fw-semibold">
                         <i class="bi bi-clipboard-pulse text-primary me-2"></i>${test.name}
                         <input type="hidden" name="tests[${index}][test_id]" value="${test.id}">
@@ -551,12 +601,91 @@ $(function() {
                     </td>
                     <td class="text-muted">${test.unit}</td>
                     <td class="ref-range"><span class="badge bg-secondary">${refRange}</span></td>
+                    <td class="text-center">
+                        <i class="bi bi-x-circle remove-test-btn" onclick="removeTestFromTable(${test.id})" title="Remove test"></i>
+                    </td>
                 </tr>
             `;
             index++;
         });
 
         testList.html(rows);
+        initializeDragAndDrop();
+    }
+
+    // Drag and Drop functionality
+    function initializeDragAndDrop() {
+        const rows = document.querySelectorAll('#test-list .test-row');
+        let draggedElement = null;
+
+        rows.forEach(row => {
+            row.addEventListener('dragstart', function(e) {
+                draggedElement = this;
+                this.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            row.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+                rows.forEach(r => r.classList.remove('drag-over'));
+                updateTestOrder();
+            });
+
+            row.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+
+                if (draggedElement !== this) {
+                    this.classList.add('drag-over');
+                }
+            });
+
+            row.addEventListener('dragleave', function() {
+                this.classList.remove('drag-over');
+            });
+
+            row.addEventListener('drop', function(e) {
+                e.preventDefault();
+
+                if (draggedElement !== this) {
+                    const allRows = Array.from(rows);
+                    const draggedIndex = allRows.indexOf(draggedElement);
+                    const targetIndex = allRows.indexOf(this);
+
+                    if (draggedIndex < targetIndex) {
+                        this.parentNode.insertBefore(draggedElement, this.nextSibling);
+                    } else {
+                        this.parentNode.insertBefore(draggedElement, this);
+                    }
+                }
+
+                this.classList.remove('drag-over');
+            });
+        });
+    }
+
+    // Update test order after drag and drop
+    function updateTestOrder() {
+        const rows = document.querySelectorAll('#test-list .test-row');
+        const newTestsMap = new Map();
+
+        rows.forEach((row, index) => {
+            const testId = parseInt(row.dataset.testId);
+            const test = selectedTests.get(testId);
+            if (test) {
+                newTestsMap.set(testId, test);
+            }
+
+            // Update input names
+            row.querySelectorAll('input[name^="tests["]').forEach(input => {
+                const nameMatch = input.name.match(/tests\[\d+\](\[.+\])/);
+                if (nameMatch) {
+                    input.name = `tests[${index}]${nameMatch[1]}`;
+                }
+            });
+        });
+
+        selectedTests = newTestsMap;
     }
 
     // Validate and color result
