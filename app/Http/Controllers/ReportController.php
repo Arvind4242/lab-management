@@ -67,32 +67,39 @@ public function create()
 
 
 
-    public function store(Request $request)
-    {
-        // dd($request->all());
+   public function store(Request $request)
+{
+    // Create the report with authenticated user
+    $report = Report::create(array_merge(
+        $request->only([
+            'patient_name',
+            'age',
+            'gender',
+            'referred_by',
+            'client_name',
+            'test_date',
+            'test_panel_id',
+        ]),
+        ['user_id' => Auth::id()] // add the logged-in user's ID
+    ));
 
-        // Create the report with authenticated user
-        $report = Report::create(array_merge(
-            $request->only([
-                'patient_name', 'age', 'gender', 'referred_by', 'client_name', 'test_date', 'test_panel_id',
-            ]),
-            ['user_id' => Auth::id()] // add the logged-in user's ID
-        ));
+    // Save test results in the SAME drag order
+    foreach ($request->input('tests', []) as $index => $testData) {
+        $report->report_results()->create([
+            'report_test_id'   => $testData['test_id']        ?? null,
+            'test_name'        => $testData['test_name']      ?? null,
+            'parameter_name'   => $testData['parameter_name'] ?? null,
+            'value'            => $testData['value']          ?? null,
+            'unit'             => $testData['unit']           ?? null,
+            'reference_range'  => $testData['reference_range'] ?? null,
 
-        // Save test results
-        foreach ($request->input('tests', []) as $testData) {
-            $report->report_results()->create([
-                'report_test_id'    => $testData['test_id'] ?? null,
-                'test_name'         => $testData['test_name'] ?? null,
-                'parameter_name'    => $testData['parameter_name'] ?? null,
-                'value'             => $testData['value'] ?? null,
-                'unit'              => $testData['unit'] ?? null,
-                'reference_range'   => $testData['reference_range'] ?? null,
-            ]);
-        }
-
-          return redirect()->back()->with('success', 'Report saved successfully!');
+            // ✅ yahan drag & drop ka order aa raha hai
+            'display_order'    => $index,
+        ]);
     }
+
+    return redirect()->back()->with('success', 'Report saved successfully!');
+}
 
 
 //    public function edit(Report $report)

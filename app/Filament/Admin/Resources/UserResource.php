@@ -72,13 +72,36 @@ public static function form(Form $form): Form
                         ->unique(ignoreRecord: true)
                         ->required(),
 
-                    TextInput::make('password')
-                        ->label('Password')
-                        ->password()
-                        ->required(fn (string $context): bool => $context === 'create')
-                        ->dehydrateStateUsing(fn ($state) => !empty($state) ? Hash::make($state) : null)
-                        ->dehydrated(fn ($state) => filled($state))
-                        ->maxLength(255),
+                   Section::make('Change Password')
+                    ->schema([
+                        TextInput::make('old_password')
+                            ->label('Old Password')
+                            ->password()
+                            ->required(fn ($context) => $context === 'edit')
+                            ->dehydrated(false) // never save this field
+                            ->rule(function () {
+                                return function ($attribute, $value, $fail) {
+                                    if (!Hash::check($value, auth()->user()->password)) {
+                                        $fail('Old password is incorrect.');
+                                    }
+                                };
+                            }),
+
+                        TextInput::make('new_password')
+                            ->label('New Password')
+                            ->password()
+                            ->required(fn ($context) => $context === 'edit')
+                            ->confirmed() // matches new_password_confirmation
+                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                            ->dehydrated(fn ($state) => filled($state)),
+
+                        TextInput::make('new_password_confirmation')
+                            ->label('Confirm New Password')
+                            ->password()
+                            ->required(fn ($context) => $context === 'edit')
+                            ->dehydrated(false), // not saved
+                    ])
+                    ->columns(2),
 
                     Select::make('role')
                         ->label('Role')

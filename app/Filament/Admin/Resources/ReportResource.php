@@ -269,7 +269,7 @@ class ReportResource extends Resource
         ->icon('heroicon-o-arrow-down-tray')
         ->color('success')
         ->url(fn($record) => route('reports.download', $record)),
-    Tables\Actions\DeleteAction::make(),
+    // Tables\Actions\DeleteAction::make(),
            ]);
 
 

@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <a href="http://127.0.0.1:8000/admin/reports" class="btn btn-warning mb-3">
     <i class="bi bi-arrow-left"></i> Back
 </a>
@@ -12,16 +10,17 @@
             <h4 class="mb-0 ms-3">Create Lab Report</h4>
         </div>
 
-        {{-- ✅ Success Message --}}
-        @if(session('success'))
+        
+        <?php if(session('success')): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+                <i class="bi bi-check-circle-fill me-2"></i><?php echo e(session('success')); ?>
+
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        @endif
+        <?php endif; ?>
 
-        <form action="{{ route('reports.store') }}" method="POST" id="reportForm">
-            @csrf
+        <form action="<?php echo e(route('reports.store')); ?>" method="POST" id="reportForm">
+            <?php echo csrf_field(); ?>
 
             <!-- Patient Info -->
             <div class="card border-0 shadow-sm mb-4">
@@ -76,9 +75,9 @@
                         </label>
                         <select id="category_filter" class="form-select form-select-lg">
                             <option value="">🔍 All Categories</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
+                            <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($category->id); ?>"><?php echo e($category->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
 
@@ -87,11 +86,12 @@
                         <label class="form-label fw-semibold">📋 Select Test Panel (Optional - One Only)</label>
                         <select id="panel_selector" class="form-select form-select-lg">
                             <option value="">-- No Panel Selected --</option>
-                            @foreach ($panels as $id => $name)
-                                <option value="panel_{{ $id }}" data-category-id="{{ $panelCategories[$id] ?? '' }}">
-                                    {{ $name }}
+                            <?php $__currentLoopData = $panels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $id => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="panel_<?php echo e($id); ?>" data-category-id="<?php echo e($panelCategories[$id] ?? ''); ?>">
+                                    <?php echo e($name); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                         <small class="form-text text-muted mt-2 d-block">
                             <i class="bi bi-info-circle"></i> Select one panel or choose individual tests below
@@ -102,11 +102,12 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold">🧪 Select Individual Tests (Multiple)</label>
                         <select id="test_selector" class="form-select form-select-lg" multiple>
-                            @foreach ($tests as $test)
-                                <option value="test_{{ $test->id }}" data-category-id="{{ $test->category_id ?? '' }}">
-                                    {{ $test->name }}
+                            <?php $__currentLoopData = $tests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $test): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="test_<?php echo e($test->id); ?>" data-category-id="<?php echo e($test->category_id ?? ''); ?>">
+                                    <?php echo e($test->name); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                         <small class="form-text text-muted mt-2 d-block">
                             <i class="bi bi-info-circle"></i> Type to search, select multiple tests
@@ -170,7 +171,7 @@
     </div>
 </div>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -512,9 +513,9 @@ body {
     }
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
@@ -924,7 +925,7 @@ $(function() {
     });
 
     // Reset after success
-    @if(session('success'))
+    <?php if(session('success')): ?>
         $('#reportForm')[0].reset();
         categoryFilter.val('').trigger('change');
         panelSelector.val(null).trigger('change');
@@ -933,12 +934,14 @@ $(function() {
         selectedTests.clear();
         renderAllTests();
         $('html, body').animate({ scrollTop: 0 }, 'smooth');
-    @endif
+    <?php endif; ?>
 
     // Set today's date as default
     $('input[name="test_date"]').val(new Date().toISOString().split('T')[0]);
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\laravel\resources\views/reports/create.blade.php ENDPATH**/ ?>

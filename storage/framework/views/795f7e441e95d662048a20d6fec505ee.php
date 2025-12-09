@@ -477,6 +477,7 @@ footer {
                 page-break-inside: avoid;
             }
 
+
             table.results-table tr {
                 page-break-inside: avoid;
             }
@@ -594,7 +595,8 @@ footer {
         <?php endif; ?>
 
         <!-- Test Results Table -->
-      <table class="results-table">
+    <!-- Test Results Table (simple list, drag order) -->
+<table class="results-table">
     <thead>
         <tr>
             <th>Test Name</th>
@@ -605,53 +607,35 @@ footer {
     </thead>
     <tbody>
         <?php
-            $currentGroup = null;
-
-            // Sort by test_group (alphabetically) or fallback to category name
-            $sortedResults = $report->results->sortBy(function ($result) {
-                return $result->test->test_group ?? ($result->test->category->name ?? 'ZZZ');
-            });
-
-            // Collect all interpretations/comments to display once at bottom
             $interpretations = collect();
         ?>
 
-        <?php $__currentLoopData = $sortedResults; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $result): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <?php $__currentLoopData = $report->results; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $result): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?> 
             <?php
-                $groupName = $result->test->test_group ?? ($result->test->category->name ?? null);
-            ?>
-
-            
-            <?php if($groupName && $groupName !== $currentGroup): ?>
-                <tr>
-                    <td colspan="4" style=" font-weight:bold;">
-                        <?php echo e(strtoupper($groupName)); ?>
-
-                    </td>
-                </tr>
-                <?php $currentGroup = $groupName; ?>
-            <?php endif; ?>
-
-            
-            <?php
-                $value = floatval($result->value);
-                $range = trim($result->reference_range);
+                $value      = floatval($result->value);
+                $range      = trim($result->reference_range ?? '');
                 $colorClass = '';
 
                 if ($range && is_numeric($value)) {
+                    // try to parse "min - max"
                     if (preg_match_all('/\d+(?:\.\d+)?/', $range, $matches) && count($matches[0]) >= 2) {
                         $min = floatval($matches[0][0]);
                         $max = floatval($matches[0][1]);
                         if ($value < $min) $colorClass = 'low';
                         elseif ($value > $max) $colorClass = 'high';
+
+                    // parse "> x"
                     } elseif (preg_match('/>\s*(\d+(?:\.\d+)?)/', $range, $m)) {
                         if ($value <= floatval($m[1])) $colorClass = 'low';
+
+                    // parse "< x"
                     } elseif (preg_match('/<\s*(\d+(?:\.\d+)?)/', $range, $m)) {
                         if ($value >= floatval($m[1])) $colorClass = 'high';
                     }
                 }
 
-                // Collect interpretations/comments for this group
+                // collect interpretation/comment (optional)
+                $groupName = optional($result->test)->test_group;
                 if ($groupName) {
                     $groupTest = \App\Models\Test::where('test_group', $groupName)->first();
                     if ($groupTest && (!empty($groupTest->interpretation) || !empty($groupTest->comment))) {
@@ -661,8 +645,10 @@ footer {
             ?>
 
             <tr>
-                <td><?php echo e($result->test_name); ?>    </td>
-                <td class="<?php echo e($colorClass); ?>"><strong><?php echo e($result->value ?? '-'); ?></strong></td>
+                <td><?php echo e($result->test_name); ?></td>
+                <td class="<?php echo e($colorClass); ?>">
+                    <strong><?php echo e($result->value ?? '-'); ?></strong>
+                </td>
                 <td><?php echo e($result->unit ?? '-'); ?></td>
                 <td><?php echo e($result->reference_range ?? '-'); ?></td>
             </tr>
@@ -681,7 +667,10 @@ footer {
 
                             <?php if(!empty($groupTest->comment)): ?>
                                 <strong><?php echo e(strtoupper($groupTest->test_group)); ?> - Comment:</strong>
-                                <p style="text-decoration: none;font-size:16px;"><?php echo e($groupTest->comment); ?></p>
+                                <p style="text-decoration: none;font-size:16px;">
+                                    <?php echo e($groupTest->comment); ?>
+
+                                </p>
                             <?php endif; ?>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
@@ -690,6 +679,7 @@ footer {
         <?php endif; ?>
     </tbody>
 </table>
+
 
 
         <div class="end-report">------------- END OF REPORT ---------------</div>
