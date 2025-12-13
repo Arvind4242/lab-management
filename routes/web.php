@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +26,16 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/signup', function () {
+    return view('auth.signup');
+})->name('signup');
 
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+
+Route::post('/signup', [AuthController::class, 'signup'])->name('signup.submit');
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
 Route::middleware(['auth'])->group(function() {
 

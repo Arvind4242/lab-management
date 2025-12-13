@@ -6,6 +6,7 @@ use Filament\Tables\Filters\SelectFilter;
 use App\Filament\Admin\Resources\ReportResource\Pages;
 use App\Filament\Admin\Resources\ReportResource\RelationManagers\ResultsRelationManager;
 use App\Models\Report;
+use Filament\Tables\Actions\EditAction;
 use App\Models\Test;
 use App\Models\TestPanel;
 use Filament\Forms;
@@ -13,6 +14,11 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+// use App\Filament\Admin\Resources\Filter;
+use Filament\Tables\Filters\Filter;
+// use Filament\Tables\Filters\SelectFilter;
+use Filament\Forms\Components\DatePicker;
+// use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
@@ -250,15 +256,92 @@ class ReportResource extends Resource
             ])
             ->defaultSort('test_date', 'desc')
             ->filters([
-                SelectFilter::make('gender')
-                    ->options([
-                        'Male' => 'Male',
-                        'Female' => 'Female',
-                        'Other' => 'Other',
-                    ]),
-            ])
+    // ✅ Gender filter (safe)
+    SelectFilter::make('gender')
+        ->label('Gender')
+        ->options([
+            'Male'   => 'Male',
+            'Female' => 'Female',
+            'Other'  => 'Other',
+        ])
+        ->searchable(),
+
+    // ✅ Age group filter (safe)
+    SelectFilter::make('age_group')
+        ->label('Age Group')
+        ->options([
+            '0-12'  => 'Child (0-12)',
+            '13-25' => 'Teen (13-25)',
+            '26-40' => 'Adult (26-40)',
+            '41-60' => 'Middle Age (41-60)',
+            '60+'   => 'Senior (60+)',
+        ])
+        ->query(function (Builder $query, array $data): Builder {
+            if (blank($data['value'])) {
+                return $query;
+            }
+
+            return match ($data['value']) {
+                '0-12'  => $query->whereBetween('age', [0, 12]),
+                '13-25' => $query->whereBetween('age', [13, 25]),
+                '26-40' => $query->whereBetween('age', [26, 40]),
+                '41-60' => $query->whereBetween('age', [41, 60]),
+                '60+'   => $query->where('age', '>', 60),
+                default => $query,
+            };
+        }),
+
+    // ✅ Test date range filter (safe)
+    Filter::make('test_date_range')
+        ->label('Test Date')
+        ->form([
+            DatePicker::make('from')->label('From'),
+            DatePicker::make('until')->label('To'),
+        ])
+        ->query(function (Builder $query, array $data): Builder {
+            return $query
+                ->when($data['from'] ?? null, fn (Builder $q, $date) => $q->whereDate('test_date', '>=', $date))
+                ->when($data['until'] ?? null, fn (Builder $q, $date) => $q->whereDate('test_date', '<=', $date));
+        }),
+
+    // ✅ Client name filter – NULL safe
+    SelectFilter::make('client_name')
+        ->label('Client Name')
+        ->options(function () {
+            return Report::query()
+                ->whereNotNull('client_name')       // ❗ NULL hatao
+                ->distinct()
+                ->pluck('client_name')              // sirf ek column
+                ->filter()                          // empty strings bhi hatao
+                ->mapWithKeys(fn ($value) => [
+                    (string) $value => (string) $value, // ✅ key & label both string
+                ])
+                ->toArray();
+        })
+        ->searchable(),
+
+    // ✅ Referred by filter – NULL safe
+    SelectFilter::make('referred_by')
+        ->label('Referred By')
+        ->options(function () {
+            return Report::query()
+                ->whereNotNull('referred_by')
+                ->distinct()
+                ->pluck('referred_by')
+                ->filter()
+                ->mapWithKeys(fn ($value) => [
+                    (string) $value => (string) $value,
+                ])
+                ->toArray();
+        })
+        ->searchable(),
+])
+
+
            ->actions([
-    Tables\Actions\EditAction::make(),
+    Tables\Actions\EditAction::make()
+    ->url(fn ($record) => route('reports.edit', $record->id))
+    ->openUrlInNewTab(false),
     Tables\Actions\Action::make('preview')
         ->label('Preview')
         ->icon('heroicon-o-eye')

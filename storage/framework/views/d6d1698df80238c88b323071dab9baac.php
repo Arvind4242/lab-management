@@ -129,7 +129,7 @@
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center opacity-0"
                 style="animation: fadeIn 1s ease-out 0.6s forwards;">
-                <a href="{{ route('signup') }}"
+                <a href="<?php echo e(route('signup')); ?>"
                     class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 group">
                     Start Free Trial
                     <svg class="inline-block ml-2 w-5 h-5 group-hover:rotate-12 transition-transform" fill="none"
@@ -298,7 +298,7 @@
                 <p class="text-xl text-gray-300 mb-8">
                     Join laboratories worldwide that trust LabFlow for their data management needs
                 </p>
-                <a href="{{ route('signup') }}"
+                <a href="<?php echo e(route('signup')); ?>"
                     class="inline-flex items-center justify-center px-10 py-5 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full font-bold text-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 group">
                     Start Your Free Trial
                     <svg class="inline-block ml-2 w-6 h-6 group-hover:rotate-12 transition-transform" fill="none"
@@ -343,3 +343,4 @@
 </body>
 
 </html>
+<?php /**PATH C:\xampp\htdocs\laravel\resources\views/welcome.blade.php ENDPATH**/ ?>

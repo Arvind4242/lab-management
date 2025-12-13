@@ -29,6 +29,7 @@ return [
         'brand' => [
             'name' => null,
             'logo' => '/storage/images/logo.png',
+            'primary' => '#000000ff',
         ],
 
 

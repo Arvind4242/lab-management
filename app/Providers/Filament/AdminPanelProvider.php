@@ -29,8 +29,9 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('/storage/images/logo.png'))
             ->brandLogoHeight('50px')
             ->colors([
-                'primary' => Color::Amber,
-            ])
+    'primary' => '#ec4899',  // Using pink-500
+])
+
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages')
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\\Filament\\Admin\\Widgets')
@@ -54,19 +55,36 @@ class AdminPanelProvider extends PanelProvider
             ]);
     }
 
-    public function boot(): void
-    {
-        \Filament\Support\Facades\FilamentView::registerRenderHook(
-            'panels::styles.before',
-            fn (): string => '<style>
+public function boot(): void
+{
+    \Filament\Support\Facades\FilamentView::registerRenderHook(
+        'panels::styles.before',
+        fn (): string => '
+          <style>
+                /* Gradient background for entire Filament panel */
+                // body, .fi-body, .fi-layout {
+                //     background: linear-gradient(to bottom right, #0f172a, #4c1d95, #0f172a) !important;
+                //     background-attachment: fixed !important;
+                // }
+
+                /* Sidebar background — optional */
+                .fi-sidebar {
+                    background-color: rgba(216, 216, 216, 0.4) !important;
+                    backdrop-filter: blur(20px);
+                }
+
+                /* Logo fix */
                 .fi-sidebar-header img,
                 .fi-logo img {
                     width: 150px !important;
                     height: 60px !important;
                     object-fit: contain;
-                    max-width: 100%;
                 }
-            </style>'
-        );
-    }
+            </style>
+        '
+    );
+}
+
+
+
 }
