@@ -28,7 +28,7 @@
     $icon = ($alias ? \Filament\Support\Facades\FilamentIcon::resolve($alias) : null) ?: $icon;
 ?>
 
-<!--[if BLOCK]><![endif]--><?php if($icon instanceof \Illuminate\Contracts\Support\Htmlable): ?>
+<?php if($icon instanceof \Illuminate\Contracts\Support\Htmlable): ?>
     <div <?php echo e($attributes->class($class)); ?>>
         <?php echo e($icon ?? $slot); ?>
 
@@ -44,5 +44,5 @@
     <?php echo e(svg($icon,
         $class,
         array_filter($attributes->getAttributes()),)); ?>
-<?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+<?php endif; ?>
 <?php /**PATH C:\xampp\htdocs\laravel\resources\views/vendor/filament/components/icon.blade.php ENDPATH**/ ?>

@@ -3,63 +3,42 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AuthController;
+use App\Http\Middleware\AdminOnly;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+// Public pages
+Route::get('/', fn () => view('welcome'))->name('home');
+Route::get('/signup', fn () => view('auth.signup'))->name('signup');
+Route::get('/login', fn () => view('auth.login'))->name('login');
 
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin-dashboard', function () {
-        return view('admin.dashboard');
-    });
-});
-
-
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/signup', function () {
-    return view('auth.signup');
-})->name('signup');
-
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
+// Auth actions
 Route::post('/signup', [AuthController::class, 'signup'])->name('signup.submit');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
-Route::middleware(['auth'])->group(function() {
+// Admin protected pages
+Route::middleware(['auth', AdminOnly::class])->prefix('admin')->group(function () {
+    Route::get('/dashboard', fn () => view('admin.dashboard'))->name('admin.dashboard');
+    // Route::get('/create-report', [ReportController::class, 'create'])->name('reports.admin.create');
+});
 
-    // Report create/store/edit/update
-    Route::get('/reports/create', [ReportController::class, 'create'])->name('reports.create');
+// User protected report actions
+Route::middleware(['auth'])->group(function () {
+
+    // Report CRUD (user side)
+    Route::get('/reports/create', [ReportController::class, 'create'])->name('reports.user.create');
     Route::post('/reports/store', [ReportController::class, 'store'])->name('reports.store');
     Route::get('/reports/{report}/edit', [ReportController::class, 'edit'])->name('reports.edit');
     Route::put('/reports/{report}', [ReportController::class, 'update'])->name('reports.update');
 
-    // AJAX: fetch tests by panel
+    // AJAX routes
     Route::get('/reports/panel-tests/{panel}', [ReportController::class, 'getPanelTests'])->name('reports.panel.tests');
     Route::post('/reports/panel-tests', [ReportController::class, 'getPanelTestsPost'])->name('reports.panel.tests.post');
-    Route::get('/reports/test/{id}', [ReportController::class, 'getSingleTest']);
-
+    Route::get('/reports/test/{id}', [ReportController::class, 'getSingleTest'])->name('reports.single.test');
 
     // Print & Download
     Route::get('/reports/{report}/print', [ReportController::class, 'print'])->name('reports.print');
     Route::get('/reports/{report}/download', [ReportController::class, 'download'])->name('reports.download');
 
-    // Admin routes (optional, if you want separate prefix)
-    Route::prefix('admin')->group(function () {
-        Route::get('/reports/{report}/print', [ReportController::class, 'print'])->name('reports.admin.print');
-        Route::get('/reports/{report}/download', [ReportController::class, 'download'])->name('reports.admin.download');
-    });
+    // Extra test view
+    Route::get('/testView/{reportId}', [ReportController::class, 'testView'])->name('report.testView');
 
-Route::get('/testView/{reportId}', [ReportController::class, 'testView'])->name('report.testView');
 });
