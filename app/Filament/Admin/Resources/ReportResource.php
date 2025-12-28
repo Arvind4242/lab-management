@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Filament\Admin\Resources;
+use App\Filament\Admin\Resources\ReportResource\Pages\CreateReport;
 
 use Filament\Tables\Filters\SelectFilter;
 use App\Filament\Admin\Resources\ReportResource\Pages;
@@ -11,6 +12,7 @@ use App\Models\Test;
 use App\Models\TestPanel;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Tables\Actions\Action;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -337,7 +339,13 @@ class ReportResource extends Resource
         ->searchable(),
 ])
 
-
+ ->headerActions([
+            Action::make('create')
+                ->label('Create Report')
+                ->icon('heroicon-o-plus-circle')
+                ->color('success')
+                ->url(CreateReport::getUrl())
+        ])
            ->actions([
     Tables\Actions\EditAction::make()
     ->url(fn ($record) => route('reports.edit', $record->id))

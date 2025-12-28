@@ -15,15 +15,32 @@ use Barryvdh\Snappy\Facades\SnappyPdf;
 class ReportController extends Controller
 {
 
+// public function create()
+// {
+//     $categories = TestCategory::all();
+//     $panels = TestPanel::pluck('name', 'id');
+//     $panelCategories = TestPanel::pluck('category_id', 'id'); // Map panel ID to category ID
+//     $tests = Test::all();
+
+//     return view('reports.create', compact('categories', 'panels', 'panelCategories', 'tests'));
+// }
+
+
 public function create()
 {
     $categories = TestCategory::all();
     $panels = TestPanel::pluck('name', 'id');
-    $panelCategories = TestPanel::pluck('category_id', 'id'); // Map panel ID to category ID
+    $panelCategories = TestPanel::pluck('category_id', 'id')->toArray();
     $tests = Test::all();
 
-    return view('reports.create', compact('categories', 'panels', 'panelCategories', 'tests'));
+    return view('filament.admin.pages.create-report', [
+        'categories' => $categories,
+        'panels' => $panels,
+        'panelCategories' => $panelCategories,
+        'tests' => $tests,
+    ]);
 }
+
 
     // AJAX: fetch tests from a panel
     public function getPanelTests($panelId)

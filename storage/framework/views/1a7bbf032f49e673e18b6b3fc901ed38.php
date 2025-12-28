@@ -42,7 +42,7 @@
             'h-full' => $fullHeight,
         ]); ?>"
     >
-        <!--[if BLOCK]><![endif]--><?php if($header = $this->getHeader()): ?>
+        <?php if($header = $this->getHeader()): ?>
             <?php echo e($header); ?>
 
         <?php elseif($heading = $this->getHeading()): ?>
@@ -66,7 +66,7 @@
 <?php $component = $__componentOriginal4af1e0a8ab5c0dda93279f6800da3911; ?>
 <?php unset($__componentOriginal4af1e0a8ab5c0dda93279f6800da3911); ?>
 <?php endif; ?>
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
 
         <div
             class="<?php echo \Illuminate\Support\Arr::toCssClasses([
@@ -78,7 +78,7 @@
                 'h-full' => $fullHeight,
             ]); ?>"
         >
-            <!--[if BLOCK]><![endif]--><?php if($subNavigation): ?>
+            <?php if($subNavigation): ?>
                 <?php if (isset($component)) { $__componentOriginal3fc6eb3fff6868bf8dfabef4dddb45c1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal3fc6eb3fff6868bf8dfabef4dddb45c1 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament-panels::components.page.sub-navigation.select','data' => ['navigation' => $subNavigation]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -100,7 +100,7 @@
 <?php unset($__componentOriginal3fc6eb3fff6868bf8dfabef4dddb45c1); ?>
 <?php endif; ?>
 
-                <!--[if BLOCK]><![endif]--><?php if($subNavigationPosition === SubNavigationPosition::Start): ?>
+                <?php if($subNavigationPosition === SubNavigationPosition::Start): ?>
                     <?php if (isset($component)) { $__componentOriginal57dd3516f8d124ccafb2ae72c664c7c3 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal57dd3516f8d124ccafb2ae72c664c7c3 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament-panels::components.page.sub-navigation.sidebar','data' => ['navigation' => $subNavigation]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -121,9 +121,9 @@
 <?php $component = $__componentOriginal57dd3516f8d124ccafb2ae72c664c7c3; ?>
 <?php unset($__componentOriginal57dd3516f8d124ccafb2ae72c664c7c3); ?>
 <?php endif; ?>
-                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                <?php endif; ?>
 
-                <!--[if BLOCK]><![endif]--><?php if($subNavigationPosition === SubNavigationPosition::Top): ?>
+                <?php if($subNavigationPosition === SubNavigationPosition::Top): ?>
                     <?php if (isset($component)) { $__componentOriginala59fd7cea3e42dfea7d868b466385a01 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginala59fd7cea3e42dfea7d868b466385a01 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament-panels::components.page.sub-navigation.tabs','data' => ['navigation' => $subNavigation]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -144,8 +144,8 @@
 <?php $component = $__componentOriginala59fd7cea3e42dfea7d868b466385a01; ?>
 <?php unset($__componentOriginala59fd7cea3e42dfea7d868b466385a01); ?>
 <?php endif; ?>
-                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                <?php endif; ?>
+            <?php endif; ?>
 
             <div
                 class="<?php echo \Illuminate\Support\Arr::toCssClasses([
@@ -156,7 +156,7 @@
                 <?php echo e(\Filament\Support\Facades\FilamentView::renderHook('panels::page.header-widgets.before', scopes: $this->getRenderHookScopes())); ?>
 
 
-                <!--[if BLOCK]><![endif]--><?php if($headerWidgets = $this->getVisibleHeaderWidgets()): ?>
+                <?php if($headerWidgets = $this->getVisibleHeaderWidgets()): ?>
                     <?php if (isset($component)) { $__componentOriginal7259e9ea993f43cfa75aaa166dfee38d = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal7259e9ea993f43cfa75aaa166dfee38d = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament-widgets::components.widgets','data' => ['columns' => $this->getHeaderWidgetsColumns(),'data' => $widgetData,'widgets' => $headerWidgets,'class' => 'fi-page-header-widgets']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -177,7 +177,7 @@
 <?php $component = $__componentOriginal7259e9ea993f43cfa75aaa166dfee38d; ?>
 <?php unset($__componentOriginal7259e9ea993f43cfa75aaa166dfee38d); ?>
 <?php endif; ?>
-                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                <?php endif; ?>
 
                 <?php echo e(\Filament\Support\Facades\FilamentView::renderHook('panels::page.header-widgets.after', scopes: $this->getRenderHookScopes())); ?>
 
@@ -188,7 +188,7 @@
                 <?php echo e(\Filament\Support\Facades\FilamentView::renderHook('panels::page.footer-widgets.before', scopes: $this->getRenderHookScopes())); ?>
 
 
-                <!--[if BLOCK]><![endif]--><?php if($footerWidgets = $this->getVisibleFooterWidgets()): ?>
+                <?php if($footerWidgets = $this->getVisibleFooterWidgets()): ?>
                     <?php if (isset($component)) { $__componentOriginal7259e9ea993f43cfa75aaa166dfee38d = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal7259e9ea993f43cfa75aaa166dfee38d = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament-widgets::components.widgets','data' => ['columns' => $this->getFooterWidgetsColumns(),'data' => $widgetData,'widgets' => $footerWidgets,'class' => 'fi-page-footer-widgets']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -209,13 +209,13 @@
 <?php $component = $__componentOriginal7259e9ea993f43cfa75aaa166dfee38d; ?>
 <?php unset($__componentOriginal7259e9ea993f43cfa75aaa166dfee38d); ?>
 <?php endif; ?>
-                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                <?php endif; ?>
 
                 <?php echo e(\Filament\Support\Facades\FilamentView::renderHook('panels::page.footer-widgets.after', scopes: $this->getRenderHookScopes())); ?>
 
             </div>
 
-            <!--[if BLOCK]><![endif]--><?php if($subNavigation && $subNavigationPosition === SubNavigationPosition::End): ?>
+            <?php if($subNavigation && $subNavigationPosition === SubNavigationPosition::End): ?>
                 <?php if (isset($component)) { $__componentOriginal57dd3516f8d124ccafb2ae72c664c7c3 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal57dd3516f8d124ccafb2ae72c664c7c3 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament-panels::components.page.sub-navigation.sidebar','data' => ['navigation' => $subNavigation]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -236,16 +236,16 @@
 <?php $component = $__componentOriginal57dd3516f8d124ccafb2ae72c664c7c3; ?>
 <?php unset($__componentOriginal57dd3516f8d124ccafb2ae72c664c7c3); ?>
 <?php endif; ?>
-            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            <?php endif; ?>
         </div>
 
-        <!--[if BLOCK]><![endif]--><?php if($footer = $this->getFooter()): ?>
+        <?php if($footer = $this->getFooter()): ?>
             <?php echo e($footer); ?>
 
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
     </section>
 
-    <!--[if BLOCK]><![endif]--><?php if(! ($this instanceof \Filament\Tables\Contracts\HasTable)): ?>
+    <?php if(! ($this instanceof \Filament\Tables\Contracts\HasTable)): ?>
         <?php if (isset($component)) { $__componentOriginal028e05680f6c5b1e293abd7fbe5f9758 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal028e05680f6c5b1e293abd7fbe5f9758 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament-actions::components.modals','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
@@ -270,13 +270,13 @@
         <div
             wire:init="mountTableAction(<?php echo \Illuminate\Support\Js::from($this->defaultTableAction)->toHtml() ?>, <?php if(filled($this->defaultTableActionRecord)): ?> <?php echo \Illuminate\Support\Js::from($this->defaultTableActionRecord)->toHtml() ?> <?php else: ?> null <?php endif; ?> <?php if(filled($this->defaultTableActionArguments)): ?> , <?php echo \Illuminate\Support\Js::from($this->defaultTableActionArguments)->toHtml() ?> <?php endif; ?>)"
         ></div>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 
-    <!--[if BLOCK]><![endif]--><?php if(filled($this->defaultAction)): ?>
+    <?php if(filled($this->defaultAction)): ?>
         <div
             wire:init="mountAction(<?php echo \Illuminate\Support\Js::from($this->defaultAction)->toHtml() ?> <?php if(filled($this->defaultActionArguments)): ?> , <?php echo \Illuminate\Support\Js::from($this->defaultActionArguments)->toHtml() ?> <?php endif; ?>)"
         ></div>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 
     <?php echo e(\Filament\Support\Facades\FilamentView::renderHook('panels::page.end', scopes: $this->getRenderHookScopes())); ?>
 

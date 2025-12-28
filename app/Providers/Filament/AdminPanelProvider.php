@@ -38,6 +38,11 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 \App\Filament\Admin\Widgets\StatsOverviewWidget::class, // ✅ Only custom widget
             ])
+            ->pages([
+    Pages\Dashboard::class,
+    \App\Filament\Admin\Pages\CreateReport::class, // 👈 ye line add karo
+])
+
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -51,12 +56,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                AdminOnly::class,
+                // AdminOnly::class,
             ]);
     }
 
 public function boot(): void
 {
+    config(['filament.exports.enabled' => false]);
+    config(['filament.imports.enabled' => false]);
     \Filament\Support\Facades\FilamentView::registerRenderHook(
         'panels::styles.before',
         fn (): string => '
