@@ -3,7 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Middleware\AdminOnly;
+
+
 
 // Public pages
 Route::get('/', fn () => view('welcome'))->name('home');
@@ -40,5 +43,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Extra test view
     Route::get('/testView/{reportId}', [ReportController::class, 'testView'])->name('report.testView');
+
+    Route::post('/payment', [PaymentController::class, 'store'])->name('payment.store');
+    Route::get('/buy-now', [PaymentController::class, 'redirectFlow'])->name('buy.now');
+    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.page');
+
 
 });

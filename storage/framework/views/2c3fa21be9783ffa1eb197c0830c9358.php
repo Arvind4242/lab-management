@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - LabFlow</title>
+    <title>Sign In - LabFlow</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes fadeIn {
@@ -60,17 +60,17 @@
     <!-- Navigation -->
     <nav class="relative z-10 px-6 py-6 backdrop-blur-sm bg-white/5 border-b border-white/10">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
-         <img
-    src="{{ asset('storage/images/lab.png') }}"
+           <img
+    src="<?php echo e(asset('storage/images/lab.png')); ?>"
     alt="icon"
     width="130"
     height="100"
     class=""
 />
             <div class="flex items-center gap-4">
-                <span class="text-gray-300 hidden sm:inline">Already have an account?</span>
-                <a href="{{ route('login') }}" class="px-6 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full font-semibold hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                    Sign In
+                <span class="text-gray-300 hidden sm:inline">Don't have an account?</span>
+                <a href="/signup" class="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105">
+                    Sign Up
                 </a>
             </div>
         </div>
@@ -87,82 +87,65 @@
                         <!-- Decorative Card -->
                         <div class="absolute -top-4 -left-4 w-32 h-32 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-2xl opacity-20 blur-xl"></div>
                         <div class="relative bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-8">
-                            <svg class="w-20 h-20 text-cyan-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            <svg class="w-20 h-20 text-purple-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                             </svg>
                             <h2 class="text-3xl font-bold mb-4 bg-gradient-to-r from-cyan-300 to-purple-300 bg-clip-text text-transparent">
-                                Join LabFlow Today
+                                Welcome Back
                             </h2>
                             <p class="text-gray-300 text-lg mb-6">
-                                Start managing your laboratory data with precision and efficiency.
+                                Sign in to access your laboratory management dashboard and continue your work.
                             </p>
-                            <ul class="space-y-4">
-                                <li class="flex items-start gap-3">
-                                    <div class="w-6 h-6 bg-cyan-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-3 text-gray-300">
+                                    <div class="w-10 h-10 bg-cyan-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                         </svg>
                                     </div>
-                                    <div>
-                                        <div class="font-semibold text-white">Role-Based Access</div>
-                                        <div class="text-gray-400 text-sm">Secure user and admin controls</div>
-                                    </div>
-                                </li>
-                                <li class="flex items-start gap-3">
-                                    <div class="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    <span>Lightning-fast data access</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-gray-300">
+                                    <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                                         </svg>
                                     </div>
-                                    <div>
-                                        <div class="font-semibold text-white">Dynamic Reports</div>
-                                        <div class="text-gray-400 text-sm">Create custom reports instantly</div>
-                                    </div>
-                                </li>
-                                <li class="flex items-start gap-3">
-                                    <div class="w-6 h-6 bg-pink-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    <span>Enterprise-grade security</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-gray-300">
+                                    <div class="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
                                         </svg>
                                     </div>
-                                    <div>
-                                        <div class="font-semibold text-white">Real-Time Analytics</div>
-                                        <div class="text-gray-400 text-sm">Track lab performance live</div>
-                                    </div>
-                                </li>
-                            </ul>
+                                    <span>Real-time analytics & reports</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 p-4 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/20 rounded-xl">
+                                <p class="text-sm text-gray-300">
+                                    <span class="font-semibold text-cyan-400">💡 Tip:</span> Use your organization email to access team features and collaboration tools.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Side - Sign Up Form -->
+            <!-- Right Side - Login Form -->
             <div class="w-full opacity-0" style="animation: fadeIn 1s ease-out 0.2s forwards;">
                 <div class="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl">
                     <div class="absolute -top-3 -right-3 w-24 h-24 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-full opacity-20 blur-2xl"></div>
 
                     <div class="relative">
                         <h1 class="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-300 to-purple-300 bg-clip-text text-transparent">
-                            Create Account
+                            Sign In
                         </h1>
-                        <p class="text-gray-400 mb-6 sm:mb-8">Get started with your free trial</p>
+                        <p class="text-gray-400 mb-6 sm:mb-8">Access your laboratory dashboard</p>
 
-                        <form  class="space-y-5 sm:space-y-6" method="POST" action="{{ route('signup.submit') }}">
-                            @csrf
-
-                            <!-- Full Name -->
-                            <div>
-                                <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    required
-                                    class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                                    placeholder="John Doe"
-                                />
-                                <span class="error-message text-red-400 text-sm mt-1 hidden"></span>
-                            </div>
+                        <form class="space-y-5 sm:space-y-6" method="POST" action="<?php echo e(route('login.submit')); ?>">
+                            <?php echo csrf_field(); ?>
 
                             <!-- Email -->
                             <div>
@@ -175,82 +158,23 @@
                                     class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
                                     placeholder="john@example.com"
                                 />
-                                @error('email')
-                                    <span class="text-red-400 text-sm mt-1">{{ $message }}</span>
-                                @enderror
-
-                            </div>
-
-                            <!-- Mobile -->
-                            <div>
-                                <label for="mobile" class="block text-sm font-medium text-gray-300 mb-2">Mobile</label>
-                                <input
-                                    type="mobile"
-                                    id="mobile"
-                                    name="mobile"
-                                    required
-                                    class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                                    placeholder="9199000000"
-                                />
-                                @error('mobile')
-                                    <span class="text-red-400 text-sm mt-1">{{ $message }}</span>
-                                @enderror
-                            </div>
-
-                            <!-- lab_name Name -->
-                            <div>
-                                <label for="lab_name" class="block text-sm font-medium text-gray-300 mb-2">Laboratory Name</label>
-                                <input
-                                    type="text"
-                                    id="lab_name"
-                                    name="lab_name"
-                                    required
-                                    class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                                    placeholder="ABC Research Lab"
-                                />
                                 <span class="error-message text-red-400 text-sm mt-1 hidden"></span>
                             </div>
-
-                             <!-- Address -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Lab Address</label>
-                                <input
-                                    type="text"
-                                    name="lab_address"
-                                    required
-                                    class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
-                                    placeholder="123 Street, City"
-                                />
-                            </div>
-
-
-                            <!-- Role Selection -->
-                            {{-- <div>
-                                <label for="role" class="block text-sm font-medium text-gray-300 mb-2">Account Type</label>
-                                <select
-                                    id="role"
-                                    name="role"
-                                    required
-                                    class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all appearance-none cursor-pointer"
-                                    style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27white%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.5em 1.5em; padding-right: 3rem;"
-                                >
-                                    <option value="" disabled selected class="bg-slate-800">Select your role</option>
-                                    <option value="user" class="bg-slate-800">User - Lab Technician</option>
-                                    <option value="admin" class="bg-slate-800">Admin - Lab Manager</option>
-                                </select>
-                                <span class="error-message text-red-400 text-sm mt-1 hidden"></span>
-                            </div> --}}
 
                             <!-- Password -->
                             <div>
-                                <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
+                                    <a href="/forgot-password" class="text-sm text-cyan-400 hover:text-cyan-300 transition-colors">
+                                        Forgot password?
+                                    </a>
+                                </div>
                                 <div class="relative">
                                     <input
                                         type="password"
                                         id="password"
                                         name="password"
                                         required
-                                        minlength="8"
                                         class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all pr-12"
                                         placeholder="••••••••"
                                     />
@@ -269,50 +193,21 @@
                                     </button>
                                 </div>
                                 <span class="error-message text-red-400 text-sm mt-1 hidden"></span>
-                                <p class="text-xs text-gray-400 mt-1">Must be at least 8 characters</p>
                             </div>
 
-                            <!-- Confirm Password -->
-                            <div>
-                                <label for="password_confirmation" class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
-                                <div class="relative">
+                            <!-- Remember Me -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
                                     <input
-                                        type="password"
-                                        id="password_confirmation"
-                                        name="password_confirmation"
-                                        required
-                                        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all pr-12"
-                                        placeholder="••••••••"
+                                        type="checkbox"
+                                        id="remember"
+                                        name="remember"
+                                        class="w-4 h-4 rounded border-white/20 bg-white/5 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0 cursor-pointer"
                                     />
-                                    <button
-                                        type="button"
-                                        onclick="togglePassword('password_confirmation')"
-                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                                    >
-                                        <svg id="password_confirmation-show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                        <svg id="password_confirmation-hide" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                                        </svg>
-                                    </button>
+                                    <label for="remember" class="text-sm text-gray-300 cursor-pointer">
+                                        Remember me
+                                    </label>
                                 </div>
-                                <span class="error-message text-red-400 text-sm mt-1 hidden"></span>
-                            </div>
-
-                            <!-- Terms Checkbox -->
-                            <div class="flex items-start gap-3">
-                                <input
-                                    type="checkbox"
-                                    id="terms"
-                                    name="terms"
-                                    required
-                                    class="mt-1 w-4 h-4 rounded border-white/20 bg-white/5 text-cyan-500 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0 cursor-pointer"
-                                />
-                                <label for="terms" class="text-sm text-gray-300 cursor-pointer">
-                                    I agree to the <a href="#" class="text-cyan-400 hover:text-cyan-300 transition-colors underline">Terms of Service</a> and <a href="#" class="text-cyan-400 hover:text-cyan-300 transition-colors underline">Privacy Policy</a>
-                                </label>
                             </div>
 
                             <!-- Submit Button -->
@@ -320,7 +215,7 @@
                                 type="submit"
                                 class="w-full px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group"
                             >
-                                <span id="buttonText">Create Account</span>
+                                <span id="buttonText">Sign In</span>
                                 <svg id="buttonArrow" class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                 </svg>
@@ -360,10 +255,10 @@
                             </button>
                         </div>
 
-                        <!-- Sign In Link -->
+                        <!-- Sign Up Link -->
                         <p class="text-center text-sm text-gray-400 mt-6">
-                            Already have an account?
-                            <a href="/login" class="text-cyan-400 hover:text-cyan-300 transition-colors font-medium">Sign in</a>
+                            Don't have an account?
+                            <a href="/signup" class="text-cyan-400 hover:text-cyan-300 transition-colors font-medium">Sign up for free</a>
                         </p>
                     </div>
                 </div>
@@ -390,7 +285,7 @@
         }
 
         // Form validation and submission
-        document.getElementById('signupForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             // Clear previous errors
@@ -399,18 +294,11 @@
                 el.textContent = '';
             });
 
-            document.querySelectorAll('input, select').forEach(el => {
+            document.querySelectorAll('input').forEach(el => {
                 el.classList.remove('border-red-500');
             });
 
             let isValid = true;
-
-            // Validate name
-            const name = document.getElementById('name').value.trim();
-            if (name.length < 2) {
-                showError('name', 'Name must be at least 2 characters long');
-                isValid = false;
-            }
 
             // Validate email
             const email = document.getElementById('email').value.trim();
@@ -420,6 +308,51 @@
                 isValid = false;
             }
 
-            // Validate lab_name
-            const lab_name = document.getElementById('lab_name').value.trim();
-            if (lab_name.length < 2) {
+            // Validate password
+            const password = document.getElementById('password').value;
+            if (password.length < 6) {
+                showError('password', 'Password must be at least 6 characters long');
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Show loading state
+                const button = e.target.querySelector('button[type="submit"]');
+                const buttonText = document.getElementById('buttonText');
+                const buttonArrow = document.getElementById('buttonArrow');
+                const buttonSpinner = document.getElementById('buttonSpinner');
+
+                button.disabled = true;
+                buttonText.textContent = 'Signing In...';
+                buttonArrow.classList.add('hidden');
+                buttonSpinner.classList.remove('hidden');
+
+                // Simulate form submission (replace with actual API call)
+                setTimeout(() => {
+                    // Success - redirect to dashboard
+                    alert('Login successful! Redirecting to dashboard...');
+                    // window.location.href = '/dashboard';
+
+                    // Reset form for demo purposes
+                    button.disabled = false;
+                    buttonText.textContent = 'Sign In';
+                    buttonArrow.classList.remove('hidden');
+                    buttonSpinner.classList.add('hidden');
+                }, 2000);
+            }
+        });
+
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorEl = field.parentElement.querySelector('.error-message');
+
+            field.classList.add('border-red-500');
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
+<?php /**PATH C:\xampp\htdocs\Laravel\resources\views/auth/login.blade.php ENDPATH**/ ?>
