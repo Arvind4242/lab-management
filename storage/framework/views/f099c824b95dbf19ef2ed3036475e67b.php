@@ -1,10 +1,16 @@
-<x-filament-panels::page>
+<?php if (isset($component)) { $__componentOriginal166a02a7c5ef5a9331faf66fa665c256 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal166a02a7c5ef5a9331faf66fa665c256 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament-panels::components.page.index','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('filament-panels::page'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
 
-{{-- Back button --}}
-{{-- <a href="{{ \App\Filament\Admin\Resources\ReportResource::getUrl() }}"
-   class="btn btn-warning mb-3">
-    <i class="bi bi-arrow-left"></i> Back
-</a> --}}
+
+
 
 <div class="container my-4">
     <div class="report-container">
@@ -14,17 +20,18 @@
             <h4 class="mb-0 ms-3">Create Lab Report</h4>
         </div>
 
-        {{-- Success message --}}
-        @if(session('success'))
+        
+        <!--[if BLOCK]><![endif]--><?php if(session('success')): ?>
             <div class="alert alert-success alert-dismissible fade show">
-                <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+                <i class="bi bi-check-circle-fill me-2"></i><?php echo e(session('success')); ?>
+
             </div>
-        @endif
+        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-        <form action="{{ route('reports.store') }}" method="POST" id="reportForm">
-            @csrf
+        <form action="<?php echo e(route('reports.store')); ?>" method="POST" id="reportForm">
+            <?php echo csrf_field(); ?>
 
-            {{-- ================= PATIENT DETAILS ================= --}}
+            
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-primary bg-gradient text-white">
                     <i class="bi bi-person-fill me-2"></i> Patient Details
@@ -64,7 +71,7 @@
                 </div>
             </div>
 
-            {{-- ================= PANEL & TEST SELECTION ================= --}}
+            
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-success bg-gradient text-white">
                     <i class="bi bi-clipboard2-pulse-fill me-2"></i>
@@ -96,7 +103,7 @@
                 </div>
             </div>
 
-            {{-- ================= TEST TABLE ================= --}}
+            
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-info bg-gradient text-white">
                     <i class="bi bi-table me-2"></i> Test Results
@@ -126,10 +133,10 @@
                 </div>
             </div>
 
-            {{-- ================= ACTIONS ================= --}}
+            
             <div class="d-flex justify-content-between gap-3">
                 <button type="button"
-                        onclick="window.location.href='{{ \App\Filament\Admin\Resources\ReportResource::getUrl() }}'"
+                        onclick="window.location.href='<?php echo e(\App\Filament\Admin\Resources\ReportResource::getUrl()); ?>'"
                         class="btn btn-outline-secondary btn-lg">
                     Cancel
                 </button>
@@ -148,8 +155,8 @@
     </div>
 </div>
 
-{{-- ================= STYLES ================= --}}
-@push('styles')
+
+<?php $__env->startPush('styles'); ?>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -166,14 +173,24 @@
     box-shadow: 0 18px 45px rgba(15,23,42,.16);
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-{{-- ================= SCRIPTS ================= --}}
-@push('scripts')
+
+<?php $__env->startPush('scripts'); ?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-{{-- 🔥 KEEP YOUR FULL EXISTING JS HERE (UNCHANGED) --}}
-@endpush
 
-</x-filament-panels::page>
+<?php $__env->stopPush(); ?>
+
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal166a02a7c5ef5a9331faf66fa665c256)): ?>
+<?php $attributes = $__attributesOriginal166a02a7c5ef5a9331faf66fa665c256; ?>
+<?php unset($__attributesOriginal166a02a7c5ef5a9331faf66fa665c256); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal166a02a7c5ef5a9331faf66fa665c256)): ?>
+<?php $component = $__componentOriginal166a02a7c5ef5a9331faf66fa665c256; ?>
+<?php unset($__componentOriginal166a02a7c5ef5a9331faf66fa665c256); ?>
+<?php endif; ?>
+<?php /**PATH C:\xampp\htdocs\Laravel\resources\views/filament/admin/pages/create-report.blade.php ENDPATH**/ ?>

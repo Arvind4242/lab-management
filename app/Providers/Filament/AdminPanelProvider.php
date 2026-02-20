@@ -59,7 +59,6 @@ class AdminPanelProvider extends PanelProvider
                 // AdminOnly::class,
             ]);
     }
-
 public function boot(): void
 {
     config(['filament.exports.enabled' => false]);

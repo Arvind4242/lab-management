@@ -61,7 +61,7 @@
     <nav class="relative z-10 px-6 py-6 backdrop-blur-sm bg-white/5 border-b border-white/10">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
          <img
-    src="{{ asset('storage/images/lab.png') }}"
+    src="<?php echo e(asset('storage/images/lab.png')); ?>"
     alt="icon"
     width="130"
     height="100"
@@ -69,7 +69,7 @@
 />
             <div class="flex items-center gap-4">
                 <span class="text-gray-300 hidden sm:inline">Already have an account?</span>
-                <a href="{{ route('login') }}" class="px-6 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full font-semibold hover:bg-white/20 transition-all duration-300 hover:scale-105">
+                <a href="<?php echo e(route('login')); ?>" class="px-6 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full font-semibold hover:bg-white/20 transition-all duration-300 hover:scale-105">
                     Sign In
                 </a>
             </div>
@@ -147,8 +147,8 @@
                         </h1>
                         <p class="text-gray-400 mb-6 sm:mb-8">Get started with your free trial</p>
 
-                        <form  class="space-y-5 sm:space-y-6" method="POST" action="{{ route('signup.submit') }}">
-                            @csrf
+                        <form  class="space-y-5 sm:space-y-6" method="POST" action="<?php echo e(route('signup.submit')); ?>">
+                            <?php echo csrf_field(); ?>
 
                             <!-- Full Name -->
                             <div>
@@ -175,9 +175,16 @@
                                     class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
                                     placeholder="john@example.com"
                                 />
-                                @error('email')
-                                    <span class="text-red-400 text-sm mt-1">{{ $message }}</span>
-                                @enderror
+                                <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <span class="text-red-400 text-sm mt-1"><?php echo e($message); ?></span>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
                             </div>
 
@@ -192,9 +199,16 @@
                                     class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
                                     placeholder="9199000000"
                                 />
-                                @error('mobile')
-                                    <span class="text-red-400 text-sm mt-1">{{ $message }}</span>
-                                @enderror
+                                <?php $__errorArgs = ['mobile'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <span class="text-red-400 text-sm mt-1"><?php echo e($message); ?></span>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
 
                             <!-- lab_name Name -->
@@ -225,21 +239,7 @@
 
 
                             <!-- Role Selection -->
-                            {{-- <div>
-                                <label for="role" class="block text-sm font-medium text-gray-300 mb-2">Account Type</label>
-                                <select
-                                    id="role"
-                                    name="role"
-                                    required
-                                    class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all appearance-none cursor-pointer"
-                                    style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27white%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.5em 1.5em; padding-right: 3rem;"
-                                >
-                                    <option value="" disabled selected class="bg-slate-800">Select your role</option>
-                                    <option value="user" class="bg-slate-800">User - Lab Technician</option>
-                                    <option value="admin" class="bg-slate-800">Admin - Lab Manager</option>
-                                </select>
-                                <span class="error-message text-red-400 text-sm mt-1 hidden"></span>
-                            </div> --}}
+                            
 
                             <!-- Password -->
                             <div>
@@ -423,3 +423,4 @@
             // Validate lab_name
             const lab_name = document.getElementById('lab_name').value.trim();
             if (lab_name.length < 2) {
+<?php /**PATH C:\xampp\htdocs\Laravel\resources\views/auth/signup.blade.php ENDPATH**/ ?>
