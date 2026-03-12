@@ -9,6 +9,7 @@ use App\Models\Test;
 class CreateReport extends Page
 {
     protected static ?string $slug = 'create-report';
+      protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static bool $shouldRegisterNavigation = true;
     protected static string $view = 'filament.admin.pages.create-report'; // 👈 static view
 
