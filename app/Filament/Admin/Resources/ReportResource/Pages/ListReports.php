@@ -16,8 +16,8 @@ class ListReports extends ListRecords
     return [
         Actions\Action::make('Create Report')
             ->label('Create Report')
-            ->icon('heroicon-o-plus')
-            ->url(route('reports.admin.create')), // ✅ correct name
+            ->icon('heroicon-o-plus'),
+            // ->url(route('reports.admin.create')), // ✅ correct name
     ];
 }
 

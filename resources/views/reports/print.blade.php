@@ -493,13 +493,19 @@ footer {
                 <td style="width: 40%;">
                     <div class="logo-section">
                         @php
-                            $logoPath = public_path('storage/' . auth()->user()->logo);
-                            $logoBase64 = '';
-                            if (file_exists($logoPath)) {
-                                $imageData = base64_encode(file_get_contents($logoPath));
-                                $imageType = pathinfo($logoPath, PATHINFO_EXTENSION);
-                                $logoBase64 = 'data:image/' . $imageType . ';base64,' . $imageData;
-                            }
+                           $logoBase64 = '';
+
+if (!empty(auth()->user()->logo)) {
+
+    $logoPath = public_path('storage/' . auth()->user()->logo);
+
+    if (file_exists($logoPath)) {
+        $imageData = base64_encode(file_get_contents($logoPath));
+        $imageType = pathinfo($logoPath, PATHINFO_EXTENSION);
+        $logoBase64 = 'data:image/' . $imageType . ';base64,' . $imageData;
+    }
+
+}
                         @endphp
                         @if($logoBase64)
                             <img src="{{ $logoBase64 }}" alt="Logo">
