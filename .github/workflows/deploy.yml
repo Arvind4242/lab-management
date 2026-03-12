@@ -1,0 +1,56 @@
+name: Laravel Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, pdo, mysql, bcmath, curl, tokenizer, xml, ctype, json
+
+    - name: Install Composer Dependencies
+      run: composer install --no-dev --prefer-dist --no-progress --no-interaction
+
+    - name: Deploy to Server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: 22
+        script: |
+          cd /var/www/your-project-folder
+
+          echo "Pull latest code"
+          git pull origin main
+
+          echo "Install dependencies"
+          composer install --no-dev --optimize-autoloader
+
+          echo "Run migrations"
+          php artisan migrate --force
+
+          echo "Clear cache"
+          php artisan config:clear
+          php artisan route:clear
+          php artisan view:clear
+
+          echo "Cache config"
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+          echo "Restart queue"
+          php artisan queue:restart
