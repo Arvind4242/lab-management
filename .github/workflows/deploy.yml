@@ -4,9 +4,6 @@ on:
   push:
     branches: [main]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,6 +17,15 @@ jobs:
         with:
           php-version: '8.3'
 
+      - name: Prepare Laravel Directories
+        run: |
+          mkdir -p bootstrap/cache
+          mkdir -p storage/framework/cache
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/views
+          mkdir -p storage/logs
+          chmod -R 775 bootstrap/cache storage
+
       - name: Install Composer Dependencies
         run: composer install --no-dev --prefer-dist --no-interaction
 
@@ -27,4 +33,3 @@ jobs:
         run: |
           php artisan config:cache
           php artisan route:cache
-          php artisan view:cache
