@@ -2,7 +2,7 @@ name: Deploy Laravel
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -21,9 +21,9 @@ jobs:
           php-version: '8.3'
 
       - name: Install Composer Dependencies
-        run: composer install --no-dev --prefer-dist --optimize-autoloader
+        run: composer install --no-dev --prefer-dist --no-interaction
 
-      - name: Run Laravel Commands
+      - name: Laravel Optimize
         run: |
           php artisan config:cache
           php artisan route:cache
