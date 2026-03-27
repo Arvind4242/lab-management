@@ -1,74 +1,112 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="en">
+<head>
 
-@section('content')
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-10 px-4">
+<title>Zalgo Payment</title>
 
-    <div class="max-w-5xl mx-auto">
+<script src="https://cdn.tailwindcss.com"></script>
 
-        {{-- User Details Section --}}
-        <div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl p-6 mb-10">
-            <div class="flex items-center gap-3 mb-5">
-                <div class="text-3xl bg-green-500 text-white w-12 h-12 flex items-center justify-center rounded-xl shadow-lg">👤</div>
-                <h2 class="text-xl font-bold text-white">User Profile</h2>
-            </div>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
-                <p><strong>Name:</strong> {{ auth()->user()->name }}</p>
-                <p><strong>Email:</strong> {{ auth()->user()->email }}</p>
-                <p><strong>Mobile:</strong> {{ auth()->user()->phone ?? 'N/A' }}</p>
-                <p><strong>City:</strong> {{ auth()->user()->city ?? 'N/A' }}</p>
-                <p><strong>State:</strong> {{ auth()->user()->state ?? 'N/A' }}</p>
-                <p><strong>Address:</strong> {{ auth()->user()->address ?? 'N/A' }}</p>
-                <p><strong>Joined On:</strong> {{ auth()->user()->created_at->format('d M, Y') }}</p>
-            </div>
-        </div>
+<style>
 
-        {{-- Packages Section --}}
-        <div class="flex items-center gap-3 mb-6">
-            <div class="text-3xl bg-yellow-500 text-white w-12 h-12 flex items-center justify-center rounded-xl shadow-lg">🧪</div>
-            <h2 class="text-2xl font-bold text-white">Lab Packages</h2>
-        </div>
+body{
+font-family:'Inter',sans-serif;
+}
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+.bg-theme{
+background: radial-gradient(circle at center,#ff3ea5 0%,#6d28d9 40%,#1e1b4b 100%);
+}
 
-            {{-- Package 1 --}}
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:scale-[1.02] transition p-5">
-                <h3 class="text-lg font-bold text-gray-900">Basic Health Package</h3>
-                <p class="text-sm text-gray-600 mt-2">Includes: CBC, Sugar, BP, Thyroid</p>
-                <div class="text-xl font-semibold mt-3">₹499</div>
-                <a href="{{ route('payment.page') }}"
-                   class="mt-4 inline-block w-full text-center px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium hover:opacity-90">
-                    Buy Now
-                </a>
-            </div>
+</style>
 
-            {{-- Package 2 --}}
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:scale-[1.02] transition p-5">
-                <h3 class="text-lg font-bold text-gray-900">Advanced Package</h3>
-                <p class="text-sm text-gray-600 mt-2">Includes: Liver, Kidney, Lipid, Vitamin</p>
-                <div class="text-xl font-semibold mt-3">₹999</div>
-                <a href="{{ route('payment.page') }}"
-                   class="mt-4 inline-block w-full text-center px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium hover:opacity-90">
-                    Buy Now
-                </a>
-            </div>
+</head>
 
-            {{-- Package 3 --}}
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:scale-[1.02] transition p-5">
-                <h3 class="text-lg font-bold text-gray-900">Full Body Checkup</h3>
-                <p class="text-sm text-gray-600 mt-2">Includes: All major tests + ECG</p>
-                <div class="text-xl font-semibold mt-3">₹1,799</div>
-                <a href="{{ route('payment.page') }}"
-                   class="mt-4 inline-block w-full text-center px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium hover:opacity-90">
-                    Buy Now
-                </a>
-            </div>
+<body class="bg-theme min-h-screen text-white flex items-center justify-center">
 
-        </div>
+<div class="max-w-xl w-full px-6">
 
-    </div>
+<!-- LOGO -->
+<div class="text-center mb-10">
+
+<h1 class="text-3xl font-bold tracking-wide">
+🧪 ZALGO LAB
+</h1>
+
+<p class="text-purple-200">
+Secure Payment Portal
+</p>
 
 </div>
 
-@endsection
+
+<!-- PAYMENT CARD -->
+<div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-10">
+
+<h2 class="text-2xl font-bold mb-6 text-center">
+Complete Your Subscription
+</h2>
+
+
+<!-- PLAN DETAILS -->
+<div class="bg-white/10 rounded-xl p-6 mb-6 border border-white/20">
+
+<div class="flex justify-between items-center">
+
+<div>
+<p class="text-purple-200 text-sm">Plan</p>
+<h3 class="text-xl font-semibold">Monthly Membership</h3>
+</div>
+
+<div class="text-2xl font-bold">
+₹1500
+</div>
+
+</div>
+
+</div>
+
+
+<!-- FEATURES -->
+<ul class="space-y-3 text-purple-200 mb-8 text-sm">
+
+<li>✔ Unlimited lab tests</li>
+<li>✔ Online report access</li>
+<li>✔ Doctor consultation</li>
+<li>✔ Priority booking</li>
+
+</ul>
+
+
+<!-- PAYMENT BUTTON -->
+<button
+class="w-full py-4 rounded-xl font-semibold text-lg bg-gradient-to-r from-cyan-400 to-purple-500 hover:opacity-90">
+
+Pay Securely ₹1500
+
+</button>
+
+
+<p class="text-center text-xs text-purple-300 mt-4">
+Powered by Razorpay • Secure Payments
+</p>
+
+</div>
+
+
+<!-- BACK LINK -->
+<div class="text-center mt-6">
+
+<a href="#" class="text-purple-300 hover:text-white text-sm">
+← Back to plans
+</a>
+
+</div>
+
+</div>
+
+</body>
+</html>

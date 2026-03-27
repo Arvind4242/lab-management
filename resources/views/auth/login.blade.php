@@ -227,17 +227,17 @@
                         </form>
 
                         <!-- Divider -->
-                        <div class="relative my-6 sm:my-8">
+                        {{-- <div class="relative my-6 sm:my-8">
                             <div class="absolute inset-0 flex items-center">
                                 <div class="w-full border-t border-white/10"></div>
                             </div>
                             <div class="relative flex justify-center text-sm">
                                 <span class="px-4 bg-gradient-to-br from-white/10 to-white/5 text-gray-400">Or continue with</span>
                             </div>
-                        </div>
+                        </div> --}}
 
                         <!-- Social Login Buttons -->
-                        <div class="grid grid-cols-2 gap-4">
+                        {{-- <div class="grid grid-cols-2 gap-4">
                             <button class="px-4 py-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2 group">
                                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -253,13 +253,13 @@
                                 </svg>
                                 <span class="text-sm font-medium hidden sm:inline">GitHub</span>
                             </button>
-                        </div>
+                        </div> --}}
 
                         <!-- Sign Up Link -->
-                        <p class="text-center text-sm text-gray-400 mt-6">
+                        {{-- <p class="text-center text-sm text-gray-400 mt-6">
                             Don't have an account?
                             <a href="/signup" class="text-cyan-400 hover:text-cyan-300 transition-colors font-medium">Sign up for free</a>
-                        </p>
+                        </p> --}}
                     </div>
                 </div>
             </div>

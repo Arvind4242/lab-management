@@ -202,19 +202,32 @@ public function testView($reportId)
 
     // 📄 Download report as PDF
  public function download(Report $report)
-{
-    $patientName = $report->patient->name ?? 'Unknown_Patient';
-    $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $patientName);
+    {
+        $report->load(['panel.category', 'results.test.category']);
 
-    $pdf = \PDF::loadView('reports.print', compact('report'))
-        ->setPaper('a4')
-        ->setOption('margin-top', 5)
-        ->setOption('margin-bottom', 5)
-        ->setOption('margin-left', 5)
-        ->setOption('margin-right', 5);
+        $patientName = $report->patient_name ?? 'Report';
+        $safeName    = preg_replace('/[^A-Za-z0-9_\-]/', '_', $patientName);
 
-    return $pdf->download($safeName . '_report.pdf');
-}
+        $pdf = PDF::loadView('reports.print', compact('report'))
+            ->setPaper('A4', 'portrait')
+            ->setOptions([
+                'defaultFont'             => 'Arial',
+                'isHtml5ParserEnabled'    => true,
+                'isRemoteEnabled'         => true,
+                'isFontSubsettingEnabled' => true,
+                'isPhpEnabled'            => false,
+                'dpi'                     => 96,
+                'chroot'                  => public_path(),
+                // These margins match @page in the blade exactly.
+                // header height = 120px, footer height = 112px
+                'margin_top'              => 120,
+                'margin_bottom'           => 112,
+                'margin_left'             => 0,
+                'margin_right'            => 0,
+            ]);
+
+        return $pdf->download($safeName . '_report.pdf');
+    }
 
 
 //    public function download(Report $report)
