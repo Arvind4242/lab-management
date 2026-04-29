@@ -2,473 +2,648 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>{{ $report->report_name ?? 'Medical Lab Report' }}</title>
+<title>Lab Report – {{ $report->patient_name ?? 'Patient' }}</title>
+{{-- Load Google Fonts via JS so dompdf (which ignores <script>) never tries to fetch them --}}
+<script>
+(function(){
+    var l=document.createElement('link');
+    l.rel='stylesheet';
+    l.href='https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap';
+    document.head.appendChild(l);
+})();
+</script>
 <style>
-
-/*
- ┌──────────────────────────────────────────────────────┐
- │  HOW THIS WORKS IN DOMPDF                            │
- │                                                      │
- │  @page { margin-top: Hpx; margin-bottom: Fpx }       │
- │    → DomPDF leaves Hpx gap at top of every page     │
- │    → DomPDF leaves Fpx gap at bottom of every page  │
- │                                                      │
- │  #hdr { position:fixed; top:0; height:Hpx }          │
- │    → Header fills the top margin gap exactly        │
- │                                                      │
- │  #ftr { position:fixed; bottom:0; height:Fpx }       │
- │    → Footer fills the bottom margin gap exactly     │
- │                                                      │
- │  Body content flows normally between the margins.   │
- │  Short content → gap between content and footer.    │
- │  Long content  → new page, same header+footer.      │
- └──────────────────────────────────────────────────────┘
-*/
-
-/* ── PAGE MARGINS ─────────────────────────────────────────────
-   These values MUST exactly match #hdr height and #ftr height.
-   Measure: header = 120px, footer = 112px
-──────────────────────────────────────────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BASE  — used by dompdf (PDF) and @media print both
+   Header = 162 px  |  Footer = 84 px
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 @page {
-    size:          A4 portrait;
-    margin-top:    120px;
-    margin-bottom: 112px;
-    margin-left:   0;
-    margin-right:  0;
+    size: A4 portrait;
+    margin-top:    180px;
+    margin-bottom: 84px;
+    margin-left:   36px;
+    margin-right:  36px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size:   11px;
-    line-height: 1.4;
-    color:       #000;
-    background:  #fff;
+    font-family: Arial, sans-serif;
+    font-size: 10.5px;
+    line-height: 1.45;
+    color: #1a1714;
+    background: #fff;
 }
 
-/* ── HEADER : fixed, top:0, height = @page margin-top ──────── */
+/* Action bar hidden in dompdf (no @media screen processed); shown via @media screen below */
+#action-bar { display: none; }
+
+/* ── HEADER ──────────────────────────────────────────────────────
+   Brand bar ≈ 72px + strip row1 ≈ 43px + strip row2 ≈ 43px + borders ≈ 4px = 162px
+   Use 180px so the second patient-strip row is never clipped.
+   ─────────────────────────────────────────────────────────────── */
 #hdr {
     position: fixed;
-    top:      0;
-    left:     0;
-    right:    0;
-    height:   120px;
-    background: #ffffff;
+    top: 0; left: 0; right: 0;
+    height: 180px;
     overflow: hidden;
 }
 
-.accent-top {
-    height: 5px; background: #0d1b2a;
-    font-size: 0; line-height: 0;
+/* 1. Navy brand bar */
+.brand-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1d4e89;
 }
-.hdr-tbl {
-    width: 100%; border-collapse: collapse;
-    background: #faf8f4; border-bottom: 2px solid #e5e5e5;
+.brand-tbl td { padding: 14px 36px; vertical-align: middle; }
+.b-left  { width: 50%; }
+.b-right { text-align: right; }
+
+.lab-main-name {
+    font-family: Georgia, serif;
+    font-size: 24px;
+    color: #fff;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
 }
-.hdr-tbl td { vertical-align: middle; }
-.h-logo    { width: 42%; padding: 10px 20px 8px; vertical-align: middle; }
-.h-sep     { width: 2px; background: #e5e5e5; border-left: 2px solid #e5e5e5; padding: 0; }
-.h-contact { width: 56%; padding: 10px 20px 8px 16px; vertical-align: middle; text-align: right; }
-
-.logo-img { max-width: 158px; max-height: 50px; display: block; }
-.lab-nm   { font-size: 16px; font-weight: bold; color: #0d1b2a; line-height: 1.1; }
-.lab-nm span { color: #1a6b7c; }
-.lab-tg   { font-size: 7px; color: #6b7280; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
-.barcode  { width: 88px; height: 13px; border: 1px solid #ccc; margin-top: 5px; background: #eee; }
-.c-inner  {
-    font-size: 8px; line-height: 1.7; color: #1f2937;
-    border-left: 3px solid #1a6b7c; padding-left: 8px;
-    display: inline-block; text-align: left;
+.lab-main-tag {
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
 }
-.cl { color: #1a6b7c; font-weight: bold; font-size: 7px; text-transform: uppercase; }
+.lab-contact-info {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.84);
+    line-height: 1.75;
+    text-align: right;
+}
 
-.bnr-tbl { width: 100%; border-collapse: collapse; background: #0d1b2a; }
-.bnr-tbl td { padding: 5px 20px; vertical-align: middle; }
-.bnr-tbl td:last-child { text-align: right; }
-.b-title  { font-size: 10px; font-weight: bold; color: #fff; letter-spacing: 2.5px; text-transform: uppercase; }
-.b-badge  { background: #c9a84c; color: #0d1b2a; font-size: 7px; font-weight: bold; padding: 2px 8px; letter-spacing: 1px; text-transform: uppercase; }
+/* 2. Patient info strip — 2 rows × 4 cols */
+.pt-strip {
+    width: 100%;
+    border-collapse: collapse;
+    background: #e8eff8;
+    border-bottom: 2px solid #1d4e89;
+}
+.pt-strip td {
+    width: 25%;
+    padding: 7px 14px;
+    vertical-align: top;
+    border-right: 1px solid #c8d5e8;
+}
+.pt-strip td:last-child { border-right: none; }
+.pt-row1 td { border-bottom: 1px solid #c8d5e8; }
 
-/* ── FOOTER : fixed, bottom:0, height = @page margin-bottom ── */
+.pt-lbl {
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #7a7570;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+.pt-val {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1d4e89;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────────── */
 #ftr {
     position: fixed;
-    bottom:   0;
-    left:     0;
-    right:    0;
-    height:   112px;
-    background: #ffffff;
+    bottom: 0; left: 0; right: 0;
+    height: 84px;
     overflow: hidden;
 }
 
-.note-banner {
-    background: #1a6b7c; color: #fff;
-    padding: 4px 20px; font-size: 7.5px; line-height: 1.5;
+/* 1. Legend strip */
+.legend-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f7f5f0;
+    border-top: 1px solid #e2ddd6;
 }
-.note-banner b { font-weight: bold; }
-.ftr-tbl {
-    width: 100%; border-collapse: collapse;
-    background: #faf8f4; border-top: 1.5px solid #e5e5e5;
-}
-.ftr-tbl td { padding: 7px 20px 8px; vertical-align: bottom; }
-.f-qr  { width: 68px; }
-.f-note { text-align: center; }
-.f-sig  { text-align: right; }
-.qr-box { width: 52px; height: 52px; border: 1.5px solid #0d1b2a; background: #f0f0f0; }
-.qr-lbl { font-size: 6px; color: #6b7280; letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; font-weight: bold; }
-.fn-txt   { font-size: 6.5px; color: #9ca3af; line-height: 1.6; }
-.fn-txt b { display: block; color: #6b7280; font-size: 7px; margin-bottom: 1px; }
-.fn-pg    { margin-top: 3px; font-size: 6px; color: #ccc; letter-spacing: 1px; text-transform: uppercase; }
-.sig-line  { width: 100px; height: 1px; background: #0d1b2a; margin: 0 0 3px auto; }
-.sig-img   { max-width: 100px; max-height: 38px; display: block; margin: 0 0 3px auto; }
-.doc-nm    { font-size: 10px; font-weight: bold; color: #0d1b2a; text-align: right; }
-.doc-ttl   { font-size: 6.5px; color: #1a6b7c; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; text-align: right; margin-top: 1px; }
-.auth-stmp { font-size: 6px; color: #9ca3af; border: 1px solid #e5e5e5; padding: 1px 5px; display: inline-block; margin-top: 2px; }
-.accent-bot { height: 5px; background: #c9a84c; }
+.legend-tbl td { padding: 7px 36px; font-size: 10px; color: #7a7570; }
+.leg-h { color: #c0392b; font-weight: 700; }
+.leg-l { color: #d35400; font-weight: 700; }
+.leg-n { color: #1e7e4a; font-weight: 700; }
 
-/* ── CONTENT : normal flow, DomPDF places between @page margins  */
-#main { background: #fff; }
+/* 2. Navy footer bar */
+.footer-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1d4e89;
+}
+.footer-tbl td { padding: 7px 36px; vertical-align: middle; }
+.f-disclaimer {
+    font-size: 8.5px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.55;
+    width: 62%;
+}
+.f-right { text-align: right; }
+.pg-num::after {
+    content: "Page " counter(page);
+    font-size: 9.5px;
+    color: rgba(255,255,255,0.65);
+    display: block;
+    margin-bottom: 1px;
+}
+.f-sig-name  { font-size: 11px; font-weight: 700; color: #fff; text-align: right; }
+.f-sig-title { font-size: 9px; color: rgba(255,255,255,0.72); letter-spacing: 0.3px; text-align: right; }
 
-.pat-tbl { width: 100%; border-collapse: collapse; border-bottom: 1.5px solid #e5e5e5; }
-.pat-tbl td { vertical-align: top; padding: 10px 20px; }
-.p-div { width: 1px; border-left: 1px dashed #ddd; padding: 0 !important; }
-.sec-lbl {
-    font-size: 6.5px; font-weight: bold; letter-spacing: 2px;
-    text-transform: uppercase; color: #1a6b7c;
-    margin-bottom: 7px; padding-bottom: 3px; border-bottom: 1px solid #e5e5e5;
+/* ── CONTENT ─────────────────────────────────────────────────── */
+.panel-badge {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #7a7570;
+    margin: 20px 0 4px;
+    font-weight: 600;
 }
-.i-tbl { width: 100%; border-collapse: collapse; }
-.i-tbl td { padding: 2px 0; vertical-align: top; }
-.ik     { font-size: 8px; color: #9ca3af; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px; width: 90px; white-space: nowrap; }
-.iv     { font-size: 10px; color: #1f2937; font-weight: bold; }
-.iv-big { font-size: 12.5px; color: #0d1b2a; font-weight: bold; }
-.pill   { font-size: 6.5px; font-weight: bold; padding: 1px 5px; letter-spacing: 1px; text-transform: uppercase; margin-left: 3px; }
-.pill-m  { background: #2a8fa3; color: #fff; }
-.pill-f  { background: #c45c8a; color: #fff; }
-.pill-o  { background: #6b7280; color: #fff; }
-.pill-ok { background: #d1fae5; color: #1e7e5e; }
-.ttl-lab {
-    text-align: center; font-size: 11px; font-weight: bold;
-    color: #0d1b2a; letter-spacing: 2px; text-transform: uppercase;
-    padding: 5px 20px; border-bottom: 1px solid #e5e5e5; background: #f7f7f7;
+
+.section-title {
+    font-family: Georgia, serif;
+    font-size: 17px;
+    color: #1d4e89;
+    border-bottom: 1px solid #e2ddd6;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+    letter-spacing: 0.02em;
 }
-.ttl-test {
-    text-align: center; font-size: 8px; font-weight: bold;
-    color: #6b7280; letter-spacing: 3px; text-transform: uppercase;
-    padding: 3px 20px 4px; border-bottom: 1px solid #e5e5e5;
+
+.grp-row td {
+    background: #eef4fb;
+    padding: 5px 14px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #1d4e89;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid #d0dff0;
+    border-left: 3px solid #1d4e89;
 }
-.r-wrap { padding: 8px 20px 5px; }
-.r-tbl  { width: 100%; border-collapse: collapse; font-size: 10px; }
-.r-tbl thead tr { background: #0d1b2a; }
-.r-tbl thead th {
-    padding: 6px 8px; font-size: 7px; font-weight: bold;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    color: #fff; text-align: left; border: none;
+
+/* Result table */
+table.rtbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+table.rtbl thead tr { background: #1d4e89; }
+table.rtbl thead th {
+    padding: 9px 14px;
+    color: #fff;
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
 }
-.r-tbl thead th.tc { text-align: center; }
-.r-tbl tbody tr        { border-bottom: 1px solid #e5e5e5; }
-.r-tbl tbody tr.even   { background: #f7f7f7; }
-.r-tbl tbody td        { padding: 6px 8px; vertical-align: middle; border: none; color: #1f2937; }
-.t-nm  { font-weight: bold; color: #0d1b2a; }
-.tc    { text-align: center; }
-.r-ok  { color: #1e7e5e; font-weight: bold; font-size: 11px; }
-.r-hi  { color: #cc0000; font-weight: bold; font-size: 11px; }
-.r-lo  { color: #d97706; font-weight: bold; font-size: 11px; }
-.r-val { font-weight: bold; font-size: 10px; }
-.r-unt { color: #6b7280; font-size: 8.5px; }
-.r-rng { color: #6b7280; font-size: 8.5px; text-align: center; }
-.flag-H { background: #fde8e8; color: #cc0000; font-size: 7px; font-weight: bold; padding: 1px 5px; }
-.flag-L { background: #fef3c7; color: #92400e; font-size: 7px; font-weight: bold; padding: 1px 5px; }
-.interp-wrap {
-    margin: 0 20px 5px; background: #fafafa; border: 1px solid #e5e5e5;
-    padding: 6px 10px; font-size: 9px; line-height: 1.6;
+table.rtbl thead th.th-result { text-align: center; }
+
+table.rtbl tbody td {
+    padding: 9px 14px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e2ddd6;
+    color: #1a1714;
+    line-height: 1.4;
 }
-.interp-lbl { font-weight: bold; color: #0d1b2a; text-transform: uppercase; font-size: 7.5px; letter-spacing: 1px; margin-top: 4px; margin-bottom: 2px; }
+
+.param-name { font-weight: 500; color: #2c2925; }
+
+.result-cell {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    text-align: center;
+    white-space: nowrap;
+}
+.unit-cell, .range-cell {
+    font-family: 'Courier New', monospace;
+    font-size: 11.5px;
+    color: #7a7570;
+}
+
+/* Inline H / L badge */
+.flag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    margin-left: 5px;
+    vertical-align: middle;
+    border: 1px solid;
+    border-radius: 3px;
+}
+.flag-H { color: #c0392b; background: #fdecea; border-color: #f5c6c2; }
+.flag-L { color: #d35400; background: #fef3ec; border-color: #f9d4b7; }
+
+.result-H { color: #c0392b; }
+.result-L { color: #d35400; }
+.result-N { color: #1e7e4a; }
+
+.remarks-box {
+    margin: 14px 0;
+    padding: 10px 14px;
+    background: #fffbf0;
+    border-left: 4px solid #e6a817;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
 .end-rpt {
-    text-align: center; padding: 7px 0 5px; margin: 0 20px;
-    color: #9ca3af; font-size: 7px; letter-spacing: 3px;
-    text-transform: uppercase; font-weight: bold;
-    border-top: 1px dashed #e5e5e5;
+    text-align: center;
+    font-size: 9px;
+    color: #9a9590;
+    margin: 22px 0 12px;
+    padding: 7px 0;
+    border-top: 1px dashed #d8d4cf;
+    border-bottom: 1px dashed #d8d4cf;
+    letter-spacing: 0.05em;
 }
 
-/* ── BROWSER ONLY ─────────────────────────────────────────────
-   DomPDF ignores @media screen — 100% safe
-──────────────────────────────────────────────────────────────── */
+.has-break { page-break-after: always; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCREEN — browser preview
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 @media screen {
-    body { background: #ccc; padding: 24px 0 40px; }
+    body { background: #f7f5f0; padding: 64px 0 40px; }
 
-    #page-card {
-        width: 794px;
-        min-height: 1123px;
-        margin: 0 auto;
-        background: #fff;
-        box-shadow: 0 6px 40px rgba(0,0,0,0.22);
+    /* Action bar */
+    #action-bar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 9999;
+        height: 54px;
+        background: #1d4e89;
         display: flex;
-        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 28px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.32);
+        font-family: 'DM Sans', Arial, sans-serif;
+    }
+    .ab-title { color: #fff; font-size: 13px; font-weight: 600; letter-spacing: 0.3px; }
+    .ab-btns  { display: flex; gap: 10px; align-items: center; }
+    .ab-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 18px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        border: none;
+        font-family: 'DM Sans', Arial, sans-serif;
+        transition: opacity .15s;
+    }
+    .ab-btn:hover { opacity: .82; }
+    .btn-back     { background: rgba(255,255,255,.15); color: #fff; }
+    .btn-print    { background: #27ae60; color: #fff; }
+    .btn-download { background: #2471a3; color: #fff; }
+
+    /* A4 page card */
+    #page-card {
+        max-width: 860px;
+        margin: 16px auto 40px;
+        background: #fff;
+        border: 1px solid #e2ddd6;
+        box-shadow: 0 4px 32px rgba(0,0,0,.1);
+        padding: 192px 0 94px;
+        position: relative;
+        overflow: hidden;
     }
 
+    /* Header/footer sit inside the card */
     #hdr {
-        position: sticky;
-        top: 0;
+        position: absolute;
+        top: 0; left: 0; right: 0;
         height: auto;
-        z-index: 100;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-        flex-shrink: 0;
-    }
-    #main {
-        flex: 1;
+        overflow: visible;
     }
     #ftr {
-        position: sticky;
-        bottom: 0;
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
         height: auto;
-        z-index: 100;
-        box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
-        flex-shrink: 0;
-        margin-top: auto;
+        overflow: visible;
     }
+
+    /* Main content padding */
+    #main { padding: 0 36px; }
+
+    /* Page break shown as dashed line in preview */
+    .has-break {
+        page-break-after: auto;
+        border-bottom: 2px dashed #c8d5e8;
+        margin-bottom: 26px;
+        padding-bottom: 20px;
+    }
+
+    /* Row hover (screen only) */
+    table.rtbl tbody tr:hover { background: #faf9f7 !important; }
+
+    /* ── Google Font overrides (browser only; dompdf uses Georgia/Courier fallbacks) ── */
+    body              { font-family: 'DM Sans', Arial, sans-serif; }
+    .lab-main-name    { font-family: 'DM Serif Display', Georgia, serif; }
+    .section-title    { font-family: 'DM Serif Display', Georgia, serif; }
+    .lab-contact-info,
+    .pt-val,
+    .result-cell,
+    .unit-cell,
+    .range-cell       { font-family: 'DM Mono', 'Courier New', monospace; }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PRINT — browser Ctrl+P / Print button
+   Forces all backgrounds/colours to print exactly like the preview.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media print {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+
+    #action-bar { display: none !important; }
+    body { background: #fff !important; padding: 0 !important; }
+
+    #page-card {
+        width: auto; margin: 0;
+        box-shadow: none; border: none;
+        padding: 180px 0 84px;
+    }
+    #hdr {
+        position: fixed !important;
+        top: 0; left: 0; right: 0;
+        height: 180px;
+        overflow: hidden;
+    }
+    #ftr {
+        position: fixed !important;
+        bottom: 0; left: 0; right: 0;
+        height: 84px;
+        overflow: hidden;
+    }
+    #main { padding: 0 36px; }
+    .has-break { page-break-after: always; }
+
+    /* Font overrides for browser print dialog */
+    body              { font-family: 'DM Sans', Arial, sans-serif; }
+    .lab-main-name    { font-family: 'DM Serif Display', Georgia, serif; }
+    .section-title    { font-family: 'DM Serif Display', Georgia, serif; }
+    .lab-contact-info,
+    .pt-val,
+    .result-cell,
+    .unit-cell,
+    .range-cell       { font-family: 'DM Mono', 'Courier New', monospace; }
 }
 </style>
 </head>
 <body>
+
+{{-- ══ ACTION BAR (screen only) ══ --}}
+<div id="action-bar">
+  <span class="ab-title">
+    Lab Report &mdash; {{ strtoupper($report->patient_name ?? 'Patient') }}
+  </span>
+  <div class="ab-btns">
+    <a href="javascript:history.back()" class="ab-btn btn-back">&#8592; Back</a>
+    <button onclick="window.print()" class="ab-btn btn-print">&#128424; Print</button>
+    <a href="{{ route('reports.download', $report) }}" class="ab-btn btn-download">&#11123; Download PDF</a>
+  </div>
+</div>
+
 <div id="page-card">
 
-{{-- ══ HEADER ══════════════════════════════════════════════════ --}}
+{{-- ══ HEADER ══ --}}
 <div id="hdr">
-  <div class="accent-top"></div>
-  <table class="hdr-tbl">
+@php
+  $user   = $report->user;
+  $logo64 = '';
+  if (!empty($user?->logo)) {
+      $lp = public_path('storage/' . $user->logo);
+      if (file_exists($lp)) {
+          $logo64 = 'data:image/' . pathinfo($lp, PATHINFO_EXTENSION)
+                  . ';base64,' . base64_encode(file_get_contents($lp));
+      }
+  }
+@endphp
+
+  {{-- 1. Navy brand bar --}}
+  <table class="brand-tbl">
     <tr>
-      <td class="h-logo">
-        @php
-          $logo64 = '';
-          if (!empty(auth()->user()->logo)) {
-            $lp = public_path('storage/' . auth()->user()->logo);
-            if (file_exists($lp)) {
-              $logo64 = 'data:image/' . pathinfo($lp, PATHINFO_EXTENSION)
-                      . ';base64,' . base64_encode(file_get_contents($lp));
-            }
-          }
-        @endphp
+      <td class="b-left">
         @if($logo64)
-          <img src="{{ $logo64 }}" alt="Logo" class="logo-img">
+          <img src="{{ $logo64 }}" alt="Logo"
+               style="max-height:40px;max-width:180px;display:block;margin-bottom:4px;">
         @else
-          <div class="lab-nm">{{ auth()->user()?->name ?? 'Lab' }} <span>Diagnostics</span></div>
-          <div class="lab-tg">Precision in Every Report</div>
+          <div class="lab-main-name">{{ $user?->name ?? 'Diagnostic Centre' }}</div>
         @endif
-        <div class="barcode"></div>
+        <div class="lab-main-tag">Trusted Diagnostics &middot; Accurate Results</div>
       </td>
-      <td class="h-sep"></td>
-      <td class="h-contact">
-        <div class="c-inner">
-          @if(auth()->user()?->address)
-            <div><span class="cl">Main Lab:</span> {{ auth()->user()->address }}</div>
-          @endif
-          <div><span class="cl">Customer Care:</span> {{ auth()->user()?->mobile ?? '—' }}</div>
-          @if(auth()->user()?->reference_lab)
-            <div><span class="cl">Reference Lab:</span> {{ auth()->user()->reference_lab }}</div>
-          @endif
-          <div>In Front of M.Y. Hospital, Gate No. 2, Indore (M.P.)</div>
-          <div><span class="cl">Email:</span> {{ auth()->user()?->email ?? '—' }}</div>
-          @if(auth()->user()?->website)
-            <div><span class="cl">Web:</span> {{ auth()->user()->website }}</div>
-          @endif
+      <td class="b-right">
+        <div class="lab-contact-info">
+          @if($user?->address){{ $user->address }}<br>@endif
+          @if($user?->reference_lab)Ref Lab: {{ $user->reference_lab }}<br>@endif
+          @if($user?->mobile){{ $user->mobile }}@endif
+          @if($user?->mobile && $user?->email) &middot; @endif
+          @if($user?->email){{ $user->email }}@endif
+          @if($user?->website)<br>{{ $user->website }}@endif
         </div>
       </td>
     </tr>
   </table>
-  <table class="bnr-tbl">
-    <tr>
-      <td><span class="b-title">Pathology Report</span></td>
+
+  {{-- 2. Patient info strip: 2 rows × 4 cols --}}
+  <table class="pt-strip">
+    <tr class="pt-row1">
       <td>
-        @php $lc = auth()->user()->lab_code ?? $report->lab_code ?? $report->id ?? null; @endphp
-        @if($lc)<span class="b-badge">Lab Code: {{ $lc }}</span>@endif
+        <div class="pt-lbl">Patient Name</div>
+        <div class="pt-val">{{ strtoupper($report->patient_name ?? '—') }}</div>
+      </td>
+      <td>
+        <div class="pt-lbl">Age / Gender</div>
+        <div class="pt-val">
+          {{ $report->age ?? '—' }} Yrs / {{ ucfirst($report->gender ?? '—') }}
+        </div>
+      </td>
+      <td>
+        <div class="pt-lbl">Sample Collected</div>
+        <div class="pt-val">
+          {{ $report->test_date
+              ? \Carbon\Carbon::parse($report->test_date)->format('d M Y')
+              : '—' }}
+        </div>
+      </td>
+      <td>
+        <div class="pt-lbl">Report No.</div>
+        <div class="pt-val">{{ str_pad($report->id, 6, '0', STR_PAD_LEFT) }}</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="pt-lbl">Referred By</div>
+        <div class="pt-val">{{ $report->referred_by ?? '—' }}</div>
+      </td>
+      <td>
+        <div class="pt-lbl">Client / Hospital</div>
+        <div class="pt-val">{{ strtoupper($report->client_name ?? '—') }}</div>
+      </td>
+      <td>
+        <div class="pt-lbl">Report Generated</div>
+        <div class="pt-val">{{ now()->format('d M Y') }}</div>
+      </td>
+      <td>
+        <div class="pt-lbl">Lab ID</div>
+        <div class="pt-val">{{ $user?->lab_code ?? '—' }}</div>
       </td>
     </tr>
   </table>
 </div>{{-- /hdr --}}
 
-{{-- ══ CONTENT ═════════════════════════════════════════════════ --}}
-<div id="main">
-  <table class="pat-tbl">
-    <tr>
-      <td style="width:48%">
-        <div class="sec-lbl">Patient Details</div>
-        <table class="i-tbl">
-          <tr><td class="ik">Patient Name</td><td class="iv-big">{{ strtoupper($report->patient_name ?? '—') }}</td></tr>
-          <tr>
-            <td class="ik">Age / Gender</td>
-            <td class="iv">
-              {{ $report->age ?? '—' }} yrs
-              @php $g = strtolower($report->gender ?? ''); @endphp
-              @if($g==='male')        <span class="pill pill-m">MALE</span>
-              @elseif($g==='female')  <span class="pill pill-f">FEMALE</span>
-              @else                   <span class="pill pill-o">{{ strtoupper($report->gender ?? '—') }}</span>
-              @endif
-            </td>
-          </tr>
-          <tr><td class="ik">Referred By</td><td class="iv">Dr. {{ strtoupper($report->referred_by ?? 'Self') }}</td></tr>
-          <tr><td class="ik">Client Name</td><td class="iv">{{ strtoupper($report->client_name ?? '—') }}</td></tr>
-        </table>
-      </td>
-      <td class="p-div"></td>
-      <td style="width:48%">
-        <div class="sec-lbl">Report Details</div>
-        <table class="i-tbl">
-          <tr>
-            <td class="ik">Sample Reg. At</td>
-            <td class="iv">
-              @php $d1 = $report->collection_date ?? $report->test_date ?? $report->created_at ?? null; @endphp
-              {{ $d1 ? \Carbon\Carbon::parse($d1)->format('d/m/Y h:i A') : '—' }}
-            </td>
-          </tr>
-          <tr>
-            <td class="ik">Reported At</td>
-            <td class="iv">
-              @php $d2 = $report->reporting_date ?? $report->updated_at ?? $report->created_at ?? null; @endphp
-              {{ $d2 ? \Carbon\Carbon::parse($d2)->format('d/m/Y h:i A') : '—' }}
-            </td>
-          </tr>
-          <tr><td class="ik">Report Type</td><td class="iv">Pathology</td></tr>
-          <tr><td class="ik">Status</td><td class="iv"><span class="pill pill-ok">&#10003; Final</span></td></tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-
-  @php $labTitle = optional(\App\Models\Lab::find(auth()->user()?->lab_id))->name ?? 'Authorized Signatory'; @endphp
-  <div class="ttl-lab">{{ strtoupper($labTitle) }}</div>
-
-  @if($report->results->isNotEmpty())
-    @php
-      $first    = $report->results->first();
-      $secTitle = optional($report->panel)->name
-               ?: optional(optional($first)->test)->name
-               ?: optional(optional($first->test)->category)->name
-               ?: ($first->category_name ?? 'Test Results');
-    @endphp
-    <div class="ttl-test">{{ strtoupper($secTitle) }}</div>
-  @endif
-
-  <div class="r-wrap">
-    <table class="r-tbl">
-      <thead>
-        <tr>
-          <th style="width:37%">Test Name</th>
-          <th style="width:15%" class="tc">Result</th>
-          <th style="width:12%">Unit</th>
-          <th style="width:24%" class="tc">Biological Reference Interval</th>
-          <th style="width:12%" class="tc">Flag</th>
-        </tr>
-      </thead>
-      <tbody>
-        @php $interps = collect(); $ri = 0; @endphp
-        @forelse($report->results as $result)
-          @php
-            $raw  = $result->value ?? '';
-            $num  = is_numeric($raw) ? floatval($raw) : null;
-            $rng  = trim($result->reference_range ?? '');
-            $cls  = ''; $flag = '';
-            if ($rng && $num !== null) {
-              if (preg_match_all('/\d+(?:\.\d+)?/', $rng, $m) && count($m[0]) >= 2) {
-                $lo = floatval($m[0][0]); $hi = floatval($m[0][1]);
-                if      ($num < $lo) { $cls='r-lo'; $flag='L'; }
-                elseif  ($num > $hi) { $cls='r-hi'; $flag='H'; }
-                else                 { $cls='r-ok'; }
-              } elseif (preg_match('/>\s*(\d+(?:\.\d+)?)/', $rng, $m)) {
-                $cls=($num<=floatval($m[1]))?'r-lo':'r-ok';
-                $flag=($num<=floatval($m[1]))?'L':'';
-              } elseif (preg_match('/<\s*(\d+(?:\.\d+)?)/', $rng, $m)) {
-                $cls=($num>=floatval($m[1]))?'r-hi':'r-ok';
-                $flag=($num>=floatval($m[1]))?'H':'';
-              }
-            }
-            $grp = optional($result->test)->test_group;
-            if ($grp) {
-              $gt = \App\Models\Test::where('test_group',$grp)->first();
-              if ($gt && (!empty($gt->interpretation)||!empty($gt->comment))) $interps->push($gt);
-            }
-            $rc = ($ri++ % 2 === 1) ? 'even' : '';
-          @endphp
-          <tr class="{{ $rc }}">
-            <td class="t-nm">{{ $result->test_name ?? '—' }}</td>
-            <td class="tc"><span class="{{ $cls ?: 'r-val' }}">{{ $raw ?: '—' }}</span></td>
-            <td class="r-unt">{{ $result->unit ?? '—' }}</td>
-            <td class="r-rng">{{ $rng ?: '—' }}</td>
-            <td class="tc">
-              @if($flag==='H')     <span class="flag-H">H</span>
-              @elseif($flag==='L') <span class="flag-L">L</span>
-              @else                <span style="color:#d1d5db">&mdash;</span>
-              @endif
-            </td>
-          </tr>
-        @empty
-          <tr><td colspan="5" style="text-align:center;padding:14px;color:#9ca3af;font-style:italic">No test results recorded.</td></tr>
-        @endforelse
-      </tbody>
-    </table>
-  </div>
-
-  @if($interps->isNotEmpty())
-    <div class="interp-wrap">
-      @foreach($interps->unique('test_group') as $gt)
-        @if(!empty($gt->interpretation))
-          <div class="interp-lbl">{{ strtoupper($gt->test_group) }} — INTERPRETATION</div>
-          <p>{{ $gt->interpretation }}</p>
-        @endif
-        @if(!empty($gt->comment))
-          <div class="interp-lbl">{{ strtoupper($gt->test_group) }} — COMMENT</div>
-          <p>{{ $gt->comment }}</p>
-        @endif
-      @endforeach
-    </div>
-  @endif
-
-  <div class="end-rpt">&mdash; End of Report &mdash;</div>
-</div>{{-- /main --}}
-
-{{-- ══ FOOTER ══════════════════════════════════════════════════ --}}
+{{-- ══ FOOTER ══ --}}
 <div id="ftr">
-  @if(auth()->user()?->note)
-    <div class="note-banner"><b>Note:</b> {{ auth()->user()->note }}</div>
-  @endif
-  <table class="ftr-tbl">
+  {{-- Legend strip --}}
+  <table class="legend-tbl">
     <tr>
-      <td class="f-qr">
-        <div class="qr-box"></div>
-        <div class="qr-lbl">Scan to Validate</div>
-      </td>
-      <td class="f-note">
-        <div class="fn-txt">
-          <b>Important Note</b>
-          Results should be interpreted in clinical context.<br>
-          This report is electronically generated &amp; valid without physical signature.<br>
-          For queries please contact our customer care.
-        </div>
-        <div class="fn-pg">Generated: {{ now()->format('d/m/Y h:i A') }}</div>
-      </td>
-      <td class="f-sig">
-        @php
-          $sig64 = '';
-          if (auth()->user()->digital_signature) {
-            $sp = public_path('storage/' . auth()->user()->digital_signature);
-            if (file_exists($sp)) {
-              $sig64 = 'data:image/' . pathinfo($sp, PATHINFO_EXTENSION)
-                     . ';base64,' . base64_encode(file_get_contents($sp));
-            }
-          }
-        @endphp
-        @if($sig64)
-          <img src="{{ $sig64 }}" alt="Signature" class="sig-img">
-        @else
-          <div class="sig-line"></div>
-        @endif
-        <div class="doc-nm">{{ auth()->user()?->name ?? 'Authorized Signatory' }}</div>
-        <div class="doc-ttl">{{ auth()->user()?->qualification ?? 'Medical Director' }}</div>
-        <div class="auth-stmp">Authorized Signatory</div>
+      <td>
+        <strong style="color:#1d4e89;font-size:9.5px;text-transform:uppercase;
+                        letter-spacing:0.1em;">Legend:</strong>
+        &nbsp;&nbsp;
+        <span class="leg-h">H</span>&nbsp;= High (above range)
+        &nbsp;&nbsp;&nbsp;
+        <span class="leg-l">L</span>&nbsp;= Low (below range)
+        &nbsp;&nbsp;&nbsp;
+        <span class="leg-n">N</span>&nbsp;= Within normal range
       </td>
     </tr>
   </table>
-  <div class="accent-bot"></div>
+
+  {{-- Navy footer bar --}}
+  <table class="footer-tbl">
+    <tr>
+      <td class="f-disclaimer">
+        {{ $user?->note
+          ?? 'This report is subject to the terms and conditions mentioned overleaf. Results are intended for medical use only. Partial reproduction of this report is not permitted.' }}
+      </td>
+      <td class="f-right">
+        <div class="pg-num"></div>
+        <div class="f-sig-name">{{ $user?->name ?? 'Authorized Signatory' }}</div>
+        <div class="f-sig-title">{{ $user?->qualification ?? 'Medical Director' }}</div>
+      </td>
+    </tr>
+  </table>
 </div>{{-- /ftr --}}
+
+{{-- ══ CONTENT ══ --}}
+<div id="main">
+@php
+  $byCategory = $report->results
+      ->sortBy('display_order')
+      ->groupBy(fn($r) => optional(optional($r->test)->category)->name ?? 'Test Results');
+  $catKeys = $byCategory->keys()->toArray();
+  $lastKey = end($catKeys);
+@endphp
+
+@forelse($byCategory as $catName => $catResults)
+  <div class="{{ $catName !== $lastKey ? 'has-break' : '' }}">
+
+    @if($report->panel?->name)
+      <div class="panel-badge">{{ $report->panel->name }}</div>
+    @endif
+
+    <div class="section-title">{{ $catName }}</div>
+
+    @php
+      $byGroup = $catResults->groupBy(fn($r) => optional($r->test)->test_group ?? '');
+    @endphp
+
+    @foreach($byGroup as $groupName => $rows)
+
+      <table class="rtbl">
+        @if($groupName)
+          {{-- Group header as a table row so it spans columns --}}
+          <thead>
+            <tr>
+              <th style="width:44%">
+                {{ strtoupper($groupName) }}
+              </th>
+              <th class="th-result" style="width:16%">Result</th>
+              <th style="width:14%">Unit</th>
+              <th style="width:26%">Reference Range</th>
+            </tr>
+          </thead>
+        @else
+          <thead>
+            <tr>
+              <th style="width:44%">Test Parameter</th>
+              <th class="th-result" style="width:16%">Result</th>
+              <th style="width:14%">Unit</th>
+              <th style="width:26%">Reference Range</th>
+            </tr>
+          </thead>
+        @endif
+        <tbody>
+          @foreach($rows as $i => $result)
+            @php
+              $raw  = $result->value ?? '';
+              $num  = is_numeric($raw) ? floatval($raw) : null;
+              $rng  = trim($result->reference_range ?? '');
+              $flag = '';
+              $resCls = '';
+              if ($rng && $num !== null) {
+                if (preg_match_all('/\d+(?:\.\d+)?/', $rng, $m) && count($m[0]) >= 2) {
+                  [$lo, $hi] = [floatval($m[0][0]), floatval($m[0][1])];
+                  if      ($num < $lo) { $flag = 'L'; $resCls = 'result-L'; }
+                  elseif  ($num > $hi) { $flag = 'H'; $resCls = 'result-H'; }
+                  else                   $resCls = 'result-N';
+                } elseif (preg_match('/>\s*(\d+(?:\.\d+)?)/', $rng, $m2)) {
+                  if ($num <= floatval($m2[1])) { $flag = 'L'; $resCls = 'result-L'; }
+                  else $resCls = 'result-N';
+                } elseif (preg_match('/<\s*(\d+(?:\.\d+)?)/', $rng, $m2)) {
+                  if ($num >= floatval($m2[1])) { $flag = 'H'; $resCls = 'result-H'; }
+                  else $resCls = 'result-N';
+                }
+              }
+              $rowBg = ($i % 2 === 0) ? '#ffffff' : '#faf9f7';
+            @endphp
+            <tr style="background:{{ $rowBg }};">
+              <td class="param-name" style="width:44%">
+                {{ $result->test_name ?? '—' }}
+              </td>
+              <td class="result-cell {{ $resCls }}" style="width:16%">
+                {{ $raw !== '' ? $raw : '—' }}
+                @if($flag)
+                  <span class="flag flag-{{ $flag }}">{{ $flag }}</span>
+                @endif
+              </td>
+              <td class="unit-cell"  style="width:14%">{{ $result->unit ?? '' }}</td>
+              <td class="range-cell" style="width:26%">{{ $rng ?: '—' }}</td>
+            </tr>
+          @endforeach
+        </tbody>
+      </table>
+
+    @endforeach
+
+    @if(!empty($report->remarks) && $catName === $lastKey)
+      <div class="remarks-box">
+        <strong>Clinical Remarks:</strong>&nbsp;{{ $report->remarks }}
+      </div>
+    @endif
+
+    <div class="end-rpt">&mdash;&nbsp;&nbsp; End of Report &nbsp;&nbsp;&mdash;</div>
+
+  </div>
+@empty
+  <p style="text-align:center;padding:48px;color:#9a9590;font-style:italic;font-size:13px;">
+    No test results recorded for this report.
+  </p>
+@endforelse
+</div>{{-- /main --}}
 
 </div>{{-- /page-card --}}
 </body>

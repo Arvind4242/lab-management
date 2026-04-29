@@ -15,13 +15,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // Pivot tables for many-to-many relations
-        Schema::create('test_package_test', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('test_package_id')->constrained()->onDelete('cascade');
-            $table->foreignId('test_id')->constrained()->onDelete('cascade');
-        });
-
+        // test_package_panel pivot (test_panels already exists at this point)
         Schema::create('test_package_panel', function (Blueprint $table) {
             $table->id();
             $table->foreignId('test_package_id')->constrained()->onDelete('cascade');
@@ -32,7 +26,6 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('test_package_panel');
-        Schema::dropIfExists('test_package_test');
         Schema::dropIfExists('test_packages');
     }
 };

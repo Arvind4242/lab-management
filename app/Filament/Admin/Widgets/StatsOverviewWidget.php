@@ -5,8 +5,10 @@ namespace App\Filament\Admin\Widgets;
 use App\Models\Lab;
 use App\Models\Report;
 use App\Models\Subscription;
+use App\Models\Test;
 use App\Models\TestCategory;
 use App\Models\TestPackage;
+use App\Models\TestPanel;
 use App\Models\User;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
@@ -68,36 +70,43 @@ class StatsOverviewWidget extends BaseWidget
             ];
         }
 
-        // ✅ ADMIN → keep your overall system stats
+        // ✅ ADMIN → system-wide overview
+        $todayReports = Report::whereDate('test_date', Carbon::today())->count();
+        $last7 = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $last7[] = Report::whereDate('test_date', Carbon::today()->subDays($i))->count();
+        }
+
         return [
+            Stat::make('Total Reports', Report::count())
+                ->description('+' . $todayReports . ' today')
+                ->descriptionIcon('heroicon-m-document-text')
+                ->chart($last7)
+                ->color('info'),
+
             Stat::make('Total Users', User::count())
-                ->description('All registered users')
+                ->description('Registered lab users')
                 ->descriptionIcon('heroicon-m-users')
                 ->color('success'),
 
-            Stat::make('Total Reports', Report::count())
-                ->description('All reports in system')
-                ->descriptionIcon('heroicon-m-document-text')
-                ->color('info'),
-
             Stat::make('Total Labs', Lab::count())
                 ->description('Registered labs')
-                ->descriptionIcon('heroicon-m-beaker')
+                ->descriptionIcon('heroicon-m-building-office-2')
                 ->color('warning'),
 
-            Stat::make('Total Subscriptions', Subscription::count())
-                ->description('Active subscriptions')
-                ->descriptionIcon('heroicon-m-credit-card')
+            Stat::make('Total Tests', Test::count())
+                ->description(TestPanel::count() . ' panels')
+                ->descriptionIcon('heroicon-m-beaker')
                 ->color('primary'),
 
-            Stat::make('Test Packages', TestPackage::count())
-                ->description('Available packages')
-                ->descriptionIcon('heroicon-m-cube')
+            Stat::make('Active Subscriptions', Subscription::where('is_active', true)->count())
+                ->description('of ' . Subscription::count() . ' total')
+                ->descriptionIcon('heroicon-m-credit-card')
                 ->color('success'),
 
-            Stat::make('Test Categories', TestCategory::count())
-                ->description('Test categories')
-                ->descriptionIcon('heroicon-m-folder')
+            Stat::make('Test Packages', TestPackage::count())
+                ->description(TestCategory::count() . ' categories')
+                ->descriptionIcon('heroicon-m-cube')
                 ->color('info'),
         ];
     }

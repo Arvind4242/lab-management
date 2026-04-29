@@ -32,19 +32,26 @@ class ReportResource extends Resource
     protected static ?string $navigationLabel = 'Reports';
     protected static ?string $pluralModelLabel = 'Reports';
     protected static ?string $modelLabel = 'Report';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Patient Details')
+                Forms\Components\Section::make('Patient Information')
+                    ->icon('heroicon-o-user-circle')
+                    ->description('Enter the patient\'s personal and demographic details.')
                     ->schema([
                         Forms\Components\TextInput::make('patient_name')
                             ->required()
-                            ->label('Patient Name'),
+                            ->label('Patient Name')
+                            ->placeholder('e.g. Rahul Sharma')
+                            ->columnSpan(2),
 
                         Forms\Components\TextInput::make('patient_id')
-                            ->label('Patient ID'),
+                            ->label('Patient ID')
+                            ->placeholder('e.g. PAT-0001')
+                            ->helperText('Leave blank to assign later.'),
 
                         Forms\Components\Select::make('gender')
                             ->options([
@@ -54,6 +61,7 @@ class ReportResource extends Resource
                             ])
                             ->required()
                             ->label('Gender')
+                            ->native(false)
                             ->live()
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 $tests = $get('tests') ?? [];
@@ -72,29 +80,50 @@ class ReportResource extends Resource
 
                         Forms\Components\TextInput::make('age')
                             ->numeric()
-                            ->label('Age (Years)'),
+                            ->label('Age')
+                            ->suffix('Years')
+                            ->minValue(0)
+                            ->maxValue(150)
+                            ->placeholder('e.g. 35'),
 
                         Forms\Components\DatePicker::make('test_date')
                             ->required()
                             ->label('Test Date')
                             ->default(now())
+                            ->native(false)
+                            ->displayFormat('d M Y')
                             ->dehydrated(true),
                     ])
-                    ->columns(2),
+                    ->columns(3),
 
-                Forms\Components\Section::make('Additional Info')
+                Forms\Components\Section::make('Referral & Client Details')
+                    ->icon('heroicon-o-building-office-2')
+                    ->description('Optional referral and client information.')
                     ->schema([
                         Forms\Components\TextInput::make('referred_by')
-                            ->label('Referred By'),
+                            ->label('Referred By')
+                            ->placeholder('e.g. Dr. Priya Mehta'),
                         Forms\Components\TextInput::make('client_name')
-                            ->label('Client Name'),
+                            ->label('Client / Hospital Name')
+                            ->placeholder('e.g. City Hospital'),
+                        Forms\Components\Textarea::make('remarks')
+                            ->label('Remarks / Notes')
+                            ->placeholder('Any additional clinical notes...')
+                            ->rows(2)
+                            ->columnSpanFull(),
                     ])
-                    ->columns(2),
+                    ->columns(2)
+                    ->collapsible()
+                    ->collapsed(false),
 
-                Forms\Components\Section::make('Panel / Test Selection')
+                Forms\Components\Section::make('Test / Panel Selection')
+                    ->icon('heroicon-o-beaker')
+                    ->description('Choose a test panel or an individual test. Results will be auto-filled below.')
                     ->schema([
                         Forms\Components\Select::make('panel_or_test')
-                            ->label('Select Panel or Test')
+                            ->label('Select Panel or Individual Test')
+                            ->placeholder('Search or browse panels and tests...')
+                            ->helperText('Selecting a panel loads all associated tests automatically.')
                             ->options(function () {
                                 $panels = TestPanel::pluck('name', 'id')->toArray();
                                 $tests = Test::pluck('name', 'id')->toArray();
@@ -108,6 +137,7 @@ class ReportResource extends Resource
                                 }
                                 return $options;
                             })
+                            ->searchable()
                             ->live()
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 if (!$state) {
@@ -168,17 +198,21 @@ class ReportResource extends Resource
                     ]),
 
                 Forms\Components\Section::make('Test Results')
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->description('Enter the result value for each test. Out-of-range values are flagged automatically.')
                     ->schema([
                         Forms\Components\Repeater::make('tests')
-                            ->label('Test List')
+                            ->label('')
                             ->schema([
                                 Forms\Components\TextInput::make('test_name')
+                                    ->label('Test Name')
                                     ->disabled()
                                     ->dehydrated(true)
-                                    ->columnSpan(2),
+                                    ->columnSpan(3),
 
                                 Forms\Components\TextInput::make('value')
                                     ->label('Result Value')
+                                    ->placeholder('Enter result')
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                         $gender = $get('../../gender') ?? 'Male';
@@ -205,18 +239,21 @@ class ReportResource extends Resource
 
                                 Forms\Components\TextInput::make('reference_range')
                                     ->disabled()
-                                    ->label('Reference Range')
+                                    ->label('Normal Range')
                                     ->columnSpan(2),
 
                                 Forms\Components\Toggle::make('is_out_of_range')
-                                    ->label('Out of Range')
+                                    ->label('Abnormal')
                                     ->disabled()
+                                    ->inline(false)
                                     ->columnSpan(1),
                             ])
-                            ->columns(8)
-                            ->reorderable()
+                            ->columns(9)
+                            ->reorderable(false)
                             ->collapsible()
                             ->itemLabel(fn (array $state): ?string => $state['test_name'] ?? null)
+                            ->addable(false)
+                            ->deletable(false)
                             ->default([]),
                     ]),
             ]);

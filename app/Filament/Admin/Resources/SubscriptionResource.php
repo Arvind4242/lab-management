@@ -17,81 +17,103 @@ class SubscriptionResource extends Resource
 {
     protected static ?string $model = Subscription::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
     protected static ?string $navigationLabel = 'Subscriptions';
     protected static ?string $pluralLabel = 'Subscriptions';
     protected static ?string $modelLabel = 'Subscription';
+    protected static ?string $navigationGroup = 'Administration';
+    protected static ?int $navigationSort = 22;
 
     public static function form(Form $form): Form
 {
     return $form
         ->schema([
-            Forms\Components\Select::make('lab_id')
-                ->label('Lab')
-                ->relationship('lab', 'name')
-                ->required()
-                ->searchable()
-                ->reactive() // 👈 so it triggers on change
-                ->afterStateUpdated(function ($state, callable $set) {
-                    // When Lab changes, reset user_id and filter it below
-                    $set('user_id', null);
-                }),
+            Forms\Components\Section::make('Lab & User')
+                ->icon('heroicon-o-building-office-2')
+                ->description('Assign this subscription to a lab and user.')
+                ->schema([
+                    Forms\Components\Select::make('lab_id')
+                        ->label('Lab')
+                        ->relationship('lab', 'name')
+                        ->required()
+                        ->searchable()
+                        ->native(false)
+                        ->reactive()
+                        ->afterStateUpdated(fn (callable $set) => $set('user_id', null)),
 
-            Forms\Components\Select::make('user_id')
-                ->label('User')
-                ->relationship('user', 'name')
-                ->required()
-                ->searchable()
-                ->reactive()
-                ->options(function (callable $get) {
-                    $labId = $get('lab_id');
-                    if (!$labId) {
-                        return \App\Models\User::pluck('name', 'id');
-                    }
-
-                    // Filter users who belong to the selected lab
-                    return \App\Models\User::where('lab_id', $labId)->pluck('name', 'id');
-                })
-                ->afterStateUpdated(function ($state, callable $set) {
-                    if ($state) {
-                        $user = \App\Models\User::find($state);
-                        if ($user && $user->lab_id) {
-                            $set('lab_id', $user->lab_id); // auto-set Lab when User is picked
-                        }
-                    }
-                }),
-
-            Forms\Components\Select::make('plan')
-                ->label('Plan')
-                ->options([
-                    'free_trial' => 'Free Trial',
-                    'monthly' => 'Monthly',
-                    'yearly' => 'Yearly',
+                    Forms\Components\Select::make('user_id')
+                        ->label('User')
+                        ->relationship('user', 'name')
+                        ->required()
+                        ->searchable()
+                        ->native(false)
+                        ->reactive()
+                        ->options(function (callable $get) {
+                            $labId = $get('lab_id');
+                            if (!$labId) {
+                                return \App\Models\User::pluck('name', 'id');
+                            }
+                            return \App\Models\User::where('lab_id', $labId)->pluck('name', 'id');
+                        })
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            if ($state) {
+                                $user = \App\Models\User::find($state);
+                                if ($user && $user->lab_id) {
+                                    $set('lab_id', $user->lab_id);
+                                }
+                            }
+                        }),
                 ])
-                ->required(),
+                ->columns(2),
 
-            Forms\Components\DatePicker::make('start_date')
-                ->required(),
+            Forms\Components\Section::make('Plan Details')
+                ->icon('heroicon-o-credit-card')
+                ->description('Choose the subscription plan, duration, and payment details.')
+                ->schema([
+                    Forms\Components\Select::make('plan')
+                        ->label('Plan')
+                        ->options([
+                            'free_trial' => 'Free Trial',
+                            'monthly' => 'Monthly',
+                            'yearly' => 'Yearly',
+                        ])
+                        ->required()
+                        ->native(false),
 
-            Forms\Components\DatePicker::make('end_date'),
+                    Forms\Components\TextInput::make('price')
+                        ->label('Price')
+                        ->numeric()
+                        ->prefix('₹')
+                        ->placeholder('0.00'),
 
-            Forms\Components\TextInput::make('price')
-                ->label('Price')
-                ->numeric()
-                ->prefix('₹'),
+                    Forms\Components\Select::make('payment_mode')
+                        ->label('Mode of Payment')
+                        ->options([
+                            'cash' => 'Cash',
+                            'online' => 'Online',
+                            'bank_transfer' => 'Bank Transfer',
+                        ])
+                        ->required()
+                        ->native(false),
 
-            Forms\Components\Select::make('payment_mode')
-                ->label('Mode of Payment')
-                ->options([
-                    'cash' => 'Cash',
-                    'online' => 'Online',
-                    'bank_transfer' => 'Bank Transfer',
+                    Forms\Components\Toggle::make('is_active')
+                        ->label('Active Subscription')
+                        ->default(true)
+                        ->helperText('Disable to suspend access without deleting the record.'),
+
+                    Forms\Components\DatePicker::make('start_date')
+                        ->label('Start Date')
+                        ->required()
+                        ->native(false)
+                        ->displayFormat('d M Y'),
+
+                    Forms\Components\DatePicker::make('end_date')
+                        ->label('End Date')
+                        ->native(false)
+                        ->displayFormat('d M Y')
+                        ->helperText('Leave blank for open-ended plans.'),
                 ])
-                ->required(),
-
-            Forms\Components\Toggle::make('is_active')
-                ->label('Active')
-                ->default(true),
+                ->columns(3),
         ]);
 }
 

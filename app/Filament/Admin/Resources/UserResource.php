@@ -26,9 +26,9 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    // protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationGroup = 'Administration';
+    protected static ?int $navigationSort = 21;
 
     // Optional: default navigation group
     // protected static ?string $navigationGroup = 'Admin';
@@ -77,7 +77,7 @@ public static function form(Form $form): Form
                         TextInput::make('old_password')
                             ->label('Old Password')
                             ->password()
-                            ->required(fn ($context) => $context === 'edit')
+                            
                             ->dehydrated(false) // never save this field
                             ->rule(function () {
                                 return function ($attribute, $value, $fail) {
@@ -90,7 +90,7 @@ public static function form(Form $form): Form
                         TextInput::make('new_password')
                             ->label('New Password')
                             ->password()
-                            ->required(fn ($context) => $context === 'edit')
+                            
                             ->confirmed() // matches new_password_confirmation
                             ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                             ->dehydrated(fn ($state) => filled($state)),
@@ -98,7 +98,7 @@ public static function form(Form $form): Form
                         TextInput::make('new_password_confirmation')
                             ->label('Confirm New Password')
                             ->password()
-                            ->required(fn ($context) => $context === 'edit')
+                            
                             ->dehydrated(false), // not saved
                     ])
                     ->columns(2),

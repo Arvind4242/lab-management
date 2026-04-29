@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('report_results', function (Blueprint $table) {
             $table->id();
             $table->foreignId('report_id')->constrained('reports')->onDelete('cascade');
-            $table->foreignId('report_test_id')->constrained('report_tests')->onDelete('cascade');
+            $table->unsignedBigInteger('report_test_id')->nullable();
             $table->string('test_name')->nullable();
             $table->string('parameter_name')->nullable();
             $table->string('value')->nullable();

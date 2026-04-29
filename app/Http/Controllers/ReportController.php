@@ -7,10 +7,9 @@ use App\Models\Report;
 use App\Models\TestPanel;
 use App\Models\TestCategory;
 use Illuminate\Http\Request;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class ReportController extends Controller
 {
@@ -173,8 +172,10 @@ public function print($reportId)
     // $report = Report::with(['panel', 'results'])->findOrFail($reportId);
 
  $report = Report::with([
-    'panel.category',        // ✅ load TestPanel + TestCategory
-    'results.test.category', // ✅ load Test + TestCategory for results
+    'user',
+    'panel.category',
+    'results' => fn ($q) => $q->orderBy('display_order')->orderBy('id'),
+    'results.test.category',
 ])->findOrFail($reportId);
 
 // \Log::info('Report Panel Debug:', [
@@ -203,28 +204,18 @@ public function testView($reportId)
     // 📄 Download report as PDF
  public function download(Report $report)
     {
-        $report->load(['panel.category', 'results.test.category']);
+        $report->load([
+            'user',
+            'panel.category',
+            'results' => fn ($q) => $q->orderBy('display_order')->orderBy('id'),
+            'results.test.category',
+        ]);
 
         $patientName = $report->patient_name ?? 'Report';
         $safeName    = preg_replace('/[^A-Za-z0-9_\-]/', '_', $patientName);
 
         $pdf = PDF::loadView('reports.print', compact('report'))
-            ->setPaper('A4', 'portrait')
-            ->setOptions([
-                'defaultFont'             => 'Arial',
-                'isHtml5ParserEnabled'    => true,
-                'isRemoteEnabled'         => true,
-                'isFontSubsettingEnabled' => true,
-                'isPhpEnabled'            => false,
-                'dpi'                     => 96,
-                'chroot'                  => public_path(),
-                // These margins match @page in the blade exactly.
-                // header height = 120px, footer height = 112px
-                'margin_top'              => 120,
-                'margin_bottom'           => 112,
-                'margin_left'             => 0,
-                'margin_right'            => 0,
-            ]);
+            ->setPaper('A4', 'portrait');
 
         return $pdf->download($safeName . '_report.pdf');
     }

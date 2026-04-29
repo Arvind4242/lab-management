@@ -17,7 +17,10 @@ class TestCategoryResource extends Resource
 {
     protected static ?string $model = TestCategory::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-folder-open';
+    protected static ?string $navigationLabel = 'Categories';
+    protected static ?string $navigationGroup = 'Test Setup';
+    protected static ?int $navigationSort = 12;
 
     public static function form(Form $form): Form
     {

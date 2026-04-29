@@ -20,27 +20,37 @@ class LabResource extends Resource
 {
     protected static ?string $model = Lab::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-
-    // protected static ?string $navigationIcon = 'heroicon-o-office-building';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
     protected static ?string $navigationLabel = 'Labs';
     protected static ?string $pluralLabel = 'Labs';
     protected static ?string $modelLabel = 'Lab';
+    protected static ?string $navigationGroup = 'Administration';
+    protected static ?int $navigationSort = 20;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                 TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Section::make('Lab Details')
+                    ->icon('heroicon-o-building-office-2')
+                    ->description('Enter the laboratory\'s basic contact information.')
+                    ->schema([
+                        TextInput::make('name')
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('e.g. City Diagnostics Centre'),
 
-                TextInput::make('address')
-                    ->maxLength(255),
+                        TextInput::make('phone')
+                            ->maxLength(20)
+                            ->tel()
+                            ->placeholder('e.g. +91 98765 43210'),
 
-                TextInput::make('phone')
-                    ->maxLength(20),
+                        TextInput::make('address')
+                            ->maxLength(255)
+                            ->placeholder('e.g. 12 Main Street, Mumbai')
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
             ]);
     }
 
@@ -48,11 +58,21 @@ class LabResource extends Resource
     {
         return $table
             ->columns([
-             TextColumn::make('id')->sortable(),
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('address')->limit(50),
-                TextColumn::make('phone'),
-                TextColumn::make('created_at')->dateTime(),
+                TextColumn::make('name')
+                    ->label('Lab Name')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('semibold'),
+                TextColumn::make('phone')
+                    ->label('Phone'),
+                TextColumn::make('address')
+                    ->label('Address')
+                    ->limit(50),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

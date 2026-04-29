@@ -11,14 +11,12 @@ return new class extends Migration
      */
    public function up()
 {
-    Schema::table('labs', function (Blueprint $table) {
-        $table->unsignedBigInteger('user_id')->after('id');
-
-        $table->foreign('user_id')
-              ->references('id')
-              ->on('users')
-              ->onDelete('cascade');
-    });
+    if (!Schema::hasColumn('labs', 'user_id')) {
+        Schema::table('labs', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id')->nullable()->after('id');
+        });
+    }
+    // Skip FK — orphaned rows in existing data prevent it from being added safely
 }
 
 

@@ -8,11 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('report_results', function (Blueprint $table) {
-            $table->unsignedInteger('display_order')
-                  ->default(0)
-                  ->after('id');
-        });
+        if (!Schema::hasColumn('report_results', 'display_order')) {
+            Schema::table('report_results', function (Blueprint $table) {
+                $table->unsignedInteger('display_order')
+                      ->default(0)
+                      ->after('id');
+            });
+        }
     }
 
     public function down(): void

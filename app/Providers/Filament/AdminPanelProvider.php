@@ -67,24 +67,50 @@ public function boot(): void
         'panels::styles.before',
         fn (): string => '
           <style>
-                /* Gradient background for entire Filament panel */
-                // body, .fi-body, .fi-layout {
-                //     background: linear-gradient(to bottom right, #0f172a, #4c1d95, #0f172a) !important;
-                //     background-attachment: fixed !important;
-                // }
-
-                /* Sidebar background — optional */
+                /* Sidebar */
                 .fi-sidebar {
-                    background-color: rgba(216, 216, 216, 0.4) !important;
-                    backdrop-filter: blur(20px);
+                    background-color: rgba(255, 255, 255, 0.85) !important;
+                    backdrop-filter: blur(16px);
+                    border-right: 1px solid rgba(0,0,0,0.06);
                 }
 
-                /* Logo fix */
+                /* Logo */
                 .fi-sidebar-header img,
                 .fi-logo img {
                     width: 150px !important;
                     height: 60px !important;
                     object-fit: contain;
+                }
+
+                /* Nav group headings */
+                .fi-sidebar-group-label {
+                    font-size: 0.65rem !important;
+                    font-weight: 700 !important;
+                    letter-spacing: 0.08em !important;
+                    text-transform: uppercase !important;
+                }
+
+                /* Section cards — subtle shadow */
+                .fi-section {
+                    box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px -1px rgba(0,0,0,0.04) !important;
+                }
+
+                /* Table header */
+                .fi-ta-header-cell {
+                    font-size: 0.7rem !important;
+                    letter-spacing: 0.06em !important;
+                    text-transform: uppercase !important;
+                }
+
+                /* Repeater items — cleaner border */
+                .fi-fo-repeater-item {
+                    border-radius: 0.5rem !important;
+                    border-color: rgba(0,0,0,0.08) !important;
+                }
+
+                /* Stats widget — rounded corners */
+                .fi-wi-stats-overview-stat {
+                    border-radius: 0.75rem !important;
                 }
             </style>
         '
