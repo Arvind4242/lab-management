@@ -412,7 +412,7 @@ table.rtbl tbody td {
   <div class="ab-btns">
     <a href="javascript:history.back()" class="ab-btn btn-back">&#8592; Back</a>
     <button onclick="window.print()" class="ab-btn btn-print">&#128424; Print</button>
-    <a href="{{ route('reports.download', $report) }}" class="ab-btn btn-download">&#11123; Download PDF</a>
+    <a href="{{ route('user.reports.download', $report) }}" class="ab-btn btn-download">&#11123; Download PDF</a>
   </div>
 </div>
 

@@ -56,10 +56,10 @@ public static function getTestsById($panelId)
 }
 
 
-    public function tests()
+    public function getTestObjects()
     {
-        return $this->belongsToMany(Test::class, 'test_panel_test', 'panel_id', 'test_id')
-                    ->withPivot(['order']);
+        if (empty($this->tests)) return collect();
+        return Test::with('unit')->whereIn('id', $this->tests)->get();
     }
 
 

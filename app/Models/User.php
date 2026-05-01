@@ -2,107 +2,61 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Filament\Models\Contracts\FilamentUser;
-
-// use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-// use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Illuminate\Foundation\Auth\User as Authenticatable;
-// use Illuminate\Notifications\Notifiable;
-// use Laravel\Sanctum\HasApiTokens;
-// use Spatie\Permission\Traits\HasRoles;
-//  use Filament\Panel;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable
 {
-    // use HasApiTokens, HasFactory, Notifiable,HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     *
-     */
-
-
-  use HasApiTokens, HasFactory, Notifiable, HasRoles;
-
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return true; // ✅ now Filament actually respects this
-    }
-
-
-
-
-// public function canAccessPanel(Panel $panel): bool
-// {
-//     return $this->role === 'admin';
-// }
-
-
- protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'lab_id',
-        'lab_code',
-        'logo',
-        'address',
-        'website',
-        'mobile',
-        'reference_lab',
-        'note',
-        'digital_signature',
-        'qualification',
+    protected $fillable = [
+        'name', 'email', 'password', 'role', 'lab_id', 'lab_code',
+        'logo', 'address', 'website', 'mobile', 'reference_lab',
+        'note', 'digital_signature', 'qualification',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
-    public function role()
-        {
-            return $this->belongsTo(Role::class);
-        }
 
     public function lab()
     {
         return $this->belongsTo(Lab::class);
     }
 
+    public function subscription()
+    {
+        return $this->hasOne(Subscription::class)->latestOfMany();
+    }
+
     public function getLogoUrlAttribute()
-{
-    return $this->logo ? asset('storage/' . $this->logo) : null;
-}
+    {
+        return $this->logo ? asset('storage/' . $this->logo) : null;
+    }
 
-public function getDigitalSignatureUrlAttribute()
-{
-    return $this->digital_signature ? asset('storage/' . $this->digital_signature) : null;
-}
+    public function getDigitalSignatureUrlAttribute()
+    {
+        return $this->digital_signature ? asset('storage/' . $this->digital_signature) : null;
+    }
 
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
 
+    public function hasActiveSubscription(): bool
+    {
+        $sub = Subscription::where('user_id', $this->id)
+            ->where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('end_date')->orWhere('end_date', '>=', now());
+            })->first();
+        return (bool) $sub;
+    }
 }

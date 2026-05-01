@@ -24,7 +24,7 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->id('admin')
-            ->path('admin')
+            ->path('filament-admin')
             ->login()
             ->brandLogo(asset('/storage/images/logo.png'))
             ->brandLogoHeight('50px')

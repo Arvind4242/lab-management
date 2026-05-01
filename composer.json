@@ -19,6 +19,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "leandrocfe/filament-apex-charts": "^3.2",
+        "razorpay/razorpay": "^2.9",
         "spatie/laravel-permission": "^6.21"
     },
     "require-dev": {

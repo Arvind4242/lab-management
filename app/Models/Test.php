@@ -29,9 +29,9 @@ class Test extends Model
     }
 
     public function testPackages()
-{
-    return $this->belongsToMany(TestPackage::class);
-}
+    {
+        return $this->belongsToMany(TestPackage::class, 'test_package_test');
+    }
 
 
 
