@@ -53,4 +53,4 @@
 </div>
 </body>
 </html>
-<?php /**PATH C:\lab\lab-management\resources\views/layouts/auth.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\lab-management\resources\views/layouts/auth.blade.php ENDPATH**/ ?>

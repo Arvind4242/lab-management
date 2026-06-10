@@ -133,4 +133,4 @@
 </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.user', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\lab\lab-management\resources\views/user/dashboard.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.user', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\lab-management\resources\views/user/dashboard.blade.php ENDPATH**/ ?>
