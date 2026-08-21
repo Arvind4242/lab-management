@@ -139,10 +139,11 @@
                         <table class="table table-hover align-middle">
                             <thead class="table-dark">
                                 <tr>
-                                    <th width="30%">Test Name</th>
-                                    <th width="25%">Result Value</th>
-                                    <th width="15%">Unit</th>
-                                    <th width="30%">Reference Range</th>
+                                    <th width="25%">Test Name</th>
+                                    <th width="20%">Result Value</th>
+                                    <th width="12%">Unit</th>
+                                    <th width="20%">Reference Range</th>
+                                    <th width="23%">Interpretation</th>
                                 </tr>
                             </thead>
                             <tbody id="test-list">
@@ -150,6 +151,7 @@
                                     <tr data-test-id="{{ $result->report_test_id }}">
                                         <td class="fw-semibold">
                                             <i class="bi bi-clipboard-pulse text-primary me-2"></i>{{ $result->test_name }}
+                                            <input type="hidden" name="tests[{{ $index }}][result_id]" value="{{ $result->id }}">
                                             <input type="hidden" name="tests[{{ $index }}][test_id]" value="{{ $result->report_test_id }}">
                                             <input type="hidden" name="tests[{{ $index }}][test_name]" value="{{ $result->test_name }}">
                                             <input type="hidden" name="tests[{{ $index }}][unit]" value="{{ $result->unit }}">
@@ -167,6 +169,12 @@
                                         </td>
                                         <td class="text-muted">{{ $result->unit }}</td>
                                         <td class="ref-range"><span class="badge bg-secondary">{{ $result->reference_range }}</span></td>
+                                        <td>
+                                            <input type="text" name="tests[{{ $index }}][interpretation]"
+                                                   class="form-control"
+                                                   placeholder="Optional interpretation"
+                                                   value="{{ $result->interpretation }}">
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -354,14 +362,18 @@ $(function() {
             const testName = $(this).find('input[name$="[test_name]"]').val();
             const unit = $(this).find('input[name$="[unit]"]').val();
             const value = $(this).find('input[name$="[value]"]').val();
+            const interpretation = $(this).find('input[name$="[interpretation]"]').val() || '';
+            const resultId = $(this).find('input[name$="[result_id]"]').val() || '';
             const refInput = $(this).find('input[name$="[reference_range]"]');
 
             if (testId) {
                 existingTests.push({
                     id: testId,
+                    result_id: resultId,
                     name: testName,
                     unit: unit,
                     value: value,
+                    interpretation: interpretation,
                     reference_range_male: refInput.data('male'),
                     reference_range_female: refInput.data('female'),
                     reference_range_other: refInput.data('other')
@@ -369,6 +381,7 @@ $(function() {
 
                 selectedTests.set(testId, {
                     id: testId,
+                    result_id: resultId,
                     name: testName,
                     unit: unit,
                     reference_range_male: refInput.data('male'),
@@ -556,7 +569,7 @@ $(function() {
             return;
         }
 
-        testList.html('<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary" role="status"></div> Loading tests...</td></tr>');
+        testList.html('<tr><td colspan="5" class="text-center"><div class="spinner-border text-primary" role="status"></div> Loading tests...</td></tr>');
 
         let promises = [];
 
@@ -601,7 +614,7 @@ $(function() {
     // Render all tests
     function renderAllTests() {
         if (selectedTests.size === 0) {
-            testList.html('<tr><td colspan="4" class="text-center text-muted py-5"><i class="bi bi-search fs-1 d-block mb-2"></i>No tests selected</td></tr>');
+            testList.html('<tr><td colspan="5" class="text-center text-muted py-5"><i class="bi bi-search fs-1 d-block mb-2"></i>No tests selected</td></tr>');
             return;
         }
 
@@ -614,14 +627,16 @@ $(function() {
                         : gender === 'Female' ? test.reference_range_female
                         : test.reference_range_other;
 
-            // Check if this is an existing test to preserve its value
+            // Check if this is an existing test to preserve its value and interpretation
             let existingTest = existingTests.find(t => t.id == test.id);
             let testValue = existingTest ? existingTest.value : '';
+            let testInterp = existingTest ? (existingTest.interpretation || '') : '';
 
             rows += `
                 <tr data-test-id="${test.id}">
                     <td class="fw-semibold">
                         <i class="bi bi-clipboard-pulse text-primary me-2"></i>${test.name}
+                        <input type="hidden" name="tests[${index}][result_id]" value="${existingTest ? existingTest.result_id : ''}">
                         <input type="hidden" name="tests[${index}][test_id]" value="${test.id}">
                         <input type="hidden" name="tests[${index}][test_name]" value="${test.name}">
                         <input type="hidden" name="tests[${index}][unit]" value="${test.unit}">
@@ -639,6 +654,12 @@ $(function() {
                     </td>
                     <td class="text-muted">${test.unit}</td>
                     <td class="ref-range"><span class="badge bg-secondary">${refRange}</span></td>
+                    <td>
+                        <input type="text" name="tests[${index}][interpretation]"
+                               class="form-control"
+                               placeholder="Optional interpretation"
+                               value="${testInterp}">
+                    </td>
                 </tr>
             `;
             index++;

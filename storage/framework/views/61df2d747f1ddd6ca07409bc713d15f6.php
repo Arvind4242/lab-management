@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Lab Report – {{ $report->patient_name ?? 'Patient' }}</title>
-{{-- Google Fonts via JS; dompdf ignores <script> and falls back to Georgia/Courier --}}
+<title>Lab Report – <?php echo e($report->patient_name ?? 'Patient'); ?></title>
+
 <script>
 (function(){
     var l=document.createElement('link');
@@ -12,7 +12,7 @@
     document.head.appendChild(l);
 })();
 </script>
-@php $t = $theme ?? ['primary'=>'#1a3461','primaryDark'=>'#122548','primaryLite'=>'#e8f0fb','primaryBorder'=>'#c2d4ec','primaryTint'=>'#f0f5fc','legendBg'=>'#f2f6fc','legendBorder'=>'#d4e0f0','accent'=>'#e8a020']; @endphp
+<?php $t = $theme ?? ['primary'=>'#1a3461','primaryDark'=>'#122548','primaryLite'=>'#e8f0fb','primaryBorder'=>'#c2d4ec','primaryTint'=>'#f0f5fc','legendBg'=>'#f2f6fc','legendBorder'=>'#d4e0f0','accent'=>'#e8a020']; ?>
 <style>
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    BASE — dompdf uses these (no @media support). Colors output by PHP.
@@ -32,56 +32,56 @@ body { font-family:Arial,sans-serif; font-size:10.5px; line-height:1.5; color:#1
 /* ── HEADER ── */
 #hdr { position:fixed; top:0; left:0; right:0; height:186px; overflow:hidden; }
 
-.brand-tbl { width:100%; border-collapse:collapse; background:{{ $t['primary'] }}; border-bottom:4px solid {{ $t['accent'] }}; }
+.brand-tbl { width:100%; border-collapse:collapse; background:<?php echo e($t['primary']); ?>; border-bottom:4px solid <?php echo e($t['accent']); ?>; }
 .brand-tbl td { padding:13px 36px; vertical-align:middle; }
 .b-left { width:55%; } .b-right { text-align:right; }
 
 .lab-main-name { font-family:Georgia,serif; font-size:26px; color:#fff; letter-spacing:.01em; line-height:1.1; }
-.lab-sub-tag   { font-size:7.5px; text-transform:uppercase; letter-spacing:.18em; color:{{ $t['accent'] }}; margin-top:5px; }
+.lab-sub-tag   { font-size:7.5px; text-transform:uppercase; letter-spacing:.18em; color:<?php echo e($t['accent']); ?>; margin-top:5px; }
 .rpt-badge     { display:inline-block; font-size:7px; text-transform:uppercase; letter-spacing:.2em; color:rgba(255,255,255,.5); border:1px solid rgba(255,255,255,.22); padding:2px 7px; border-radius:2px; margin-top:6px; }
 .lab-contact-info { font-family:'Courier New',monospace; font-size:9.5px; color:rgba(255,255,255,.78); line-height:1.85; text-align:right; }
 
-.pt-strip { width:100%; border-collapse:collapse; background:{{ $t['primaryLite'] }}; border-bottom:2px solid {{ $t['primary'] }}; }
-.pt-strip td { width:25%; padding:7px 16px; vertical-align:top; border-right:1px solid {{ $t['primaryBorder'] }}; }
+.pt-strip { width:100%; border-collapse:collapse; background:<?php echo e($t['primaryLite']); ?>; border-bottom:2px solid <?php echo e($t['primary']); ?>; }
+.pt-strip td { width:25%; padding:7px 16px; vertical-align:top; border-right:1px solid <?php echo e($t['primaryBorder']); ?>; }
 .pt-strip td:last-child { border-right:none; }
-.pt-row1 td  { border-bottom:1px solid {{ $t['primaryBorder'] }}; }
+.pt-row1 td  { border-bottom:1px solid <?php echo e($t['primaryBorder']); ?>; }
 .pt-lbl { font-size:7.5px; text-transform:uppercase; letter-spacing:.12em; color:#7080a0; font-weight:700; margin-bottom:3px; }
-.pt-val { font-family:'Courier New',monospace; font-size:11.5px; font-weight:700; color:{{ $t['primary'] }}; }
+.pt-val { font-family:'Courier New',monospace; font-size:11.5px; font-weight:700; color:<?php echo e($t['primary']); ?>; }
 
 /* ── FOOTER ── */
 #ftr { position:fixed; bottom:0; left:0; right:0; height:88px; overflow:hidden; }
 
-.legend-tbl { width:100%; border-collapse:collapse; background:{{ $t['legendBg'] }}; border-top:1px solid {{ $t['legendBorder'] }}; }
+.legend-tbl { width:100%; border-collapse:collapse; background:<?php echo e($t['legendBg']); ?>; border-top:1px solid <?php echo e($t['legendBorder']); ?>; }
 .legend-tbl td { padding:6px 36px; font-size:10px; color:#6878a0; }
-.leg-strong { color:{{ $t['primary'] }}; font-size:9px; text-transform:uppercase; letter-spacing:.12em; }
+.leg-strong { color:<?php echo e($t['primary']); ?>; font-size:9px; text-transform:uppercase; letter-spacing:.12em; }
 .leg-h { color:#c0192b; font-weight:800; } .leg-l { color:#b84a05; font-weight:800; } .leg-n { color:#15803d; font-weight:800; }
 
-.footer-tbl { width:100%; border-collapse:collapse; background:{{ $t['primary'] }}; border-top:3px solid {{ $t['accent'] }}; }
+.footer-tbl { width:100%; border-collapse:collapse; background:<?php echo e($t['primary']); ?>; border-top:3px solid <?php echo e($t['accent']); ?>; }
 .footer-tbl td { padding:8px 36px; vertical-align:middle; }
 .f-disclaimer { font-size:8px; color:rgba(255,255,255,.6); line-height:1.65; width:60%; }
 .f-right { text-align:right; }
 .pg-num::after { content:"Page " counter(page); font-size:9px; color:rgba(255,255,255,.5); display:block; margin-bottom:2px; }
 .f-sig-name  { font-size:12px; font-weight:700; color:#fff; text-align:right; }
-.f-sig-title { font-size:9px; color:{{ $t['accent'] }}; letter-spacing:.35px; text-align:right; }
+.f-sig-title { font-size:9px; color:<?php echo e($t['accent']); ?>; letter-spacing:.35px; text-align:right; }
 
 /* ── CONTENT ── */
-.stat-bar { width:100%; border-collapse:collapse; background:{{ $t['legendBg'] }}; border:1px solid {{ $t['primaryBorder'] }}; margin-bottom:20px; }
-.stat-bar td { padding:10px 16px; text-align:center; border-right:1px solid {{ $t['primaryBorder'] }}; vertical-align:middle; }
+.stat-bar { width:100%; border-collapse:collapse; background:<?php echo e($t['legendBg']); ?>; border:1px solid <?php echo e($t['primaryBorder']); ?>; margin-bottom:20px; }
+.stat-bar td { padding:10px 16px; text-align:center; border-right:1px solid <?php echo e($t['primaryBorder']); ?>; vertical-align:middle; }
 .stat-bar td:last-child { border-right:none; }
 .stat-num { font-family:'Courier New',monospace; font-size:22px; font-weight:700; display:block; line-height:1; }
 .stat-lbl { font-size:8px; text-transform:uppercase; letter-spacing:.12em; color:#7080a0; display:block; margin-top:3px; }
-.stat-total { color:{{ $t['primary'] }}; } .stat-high { color:#c0192b; } .stat-low { color:#b84a05; } .stat-norm { color:#15803d; }
+.stat-total { color:<?php echo e($t['primary']); ?>; } .stat-high { color:#c0192b; } .stat-low { color:#b84a05; } .stat-norm { color:#15803d; }
 
-.panel-badge { display:inline-block; font-size:9px; text-transform:uppercase; letter-spacing:.14em; color:{{ $t['primary'] }}; background:{{ $t['primaryTint'] }}; border:1px solid {{ $t['primaryBorder'] }}; padding:3px 10px; border-radius:3px; margin:18px 0 6px; }
+.panel-badge { display:inline-block; font-size:9px; text-transform:uppercase; letter-spacing:.14em; color:<?php echo e($t['primary']); ?>; background:<?php echo e($t['primaryTint']); ?>; border:1px solid <?php echo e($t['primaryBorder']); ?>; padding:3px 10px; border-radius:3px; margin:18px 0 6px; }
 
-.section-title { font-family:Georgia,serif; font-size:17px; color:{{ $t['primary'] }}; padding:9px 14px 9px 16px; margin-bottom:12px; background:{{ $t['primaryTint'] }}; border-left:5px solid {{ $t['accent'] }}; }
+.section-title { font-family:Georgia,serif; font-size:17px; color:<?php echo e($t['primary']); ?>; padding:9px 14px 9px 16px; margin-bottom:12px; background:<?php echo e($t['primaryTint']); ?>; border-left:5px solid <?php echo e($t['accent']); ?>; }
 
 table.rtbl { width:100%; border-collapse:collapse; margin-bottom:2px; }
-table.rtbl thead tr { background:{{ $t['primary'] }}; }
+table.rtbl thead tr { background:<?php echo e($t['primary']); ?>; }
 table.rtbl thead th { padding:9px 14px; color:#fff; text-align:left; font-size:9.5px; text-transform:uppercase; letter-spacing:.1em; font-weight:600; }
 table.rtbl thead th.th-result { text-align:center; }
 
-.grp-hdr td { background:{{ $t['primaryDark'] }}; padding:5px 14px 5px 16px; font-size:9.5px; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.08em; border-left:4px solid {{ $t['accent'] }}; }
+.grp-hdr td { background:<?php echo e($t['primaryDark']); ?>; padding:5px 14px 5px 16px; font-size:9.5px; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.08em; border-left:4px solid <?php echo e($t['accent']); ?>; }
 
 table.rtbl tbody td { padding:9px 14px; vertical-align:middle; border-bottom:1px solid #e4ecf8; color:#1c2333; line-height:1.4; }
 .param-name { font-weight:600; color:#1c2333; font-size:11px; }
@@ -96,7 +96,7 @@ table.rtbl tbody td { padding:9px 14px; vertical-align:middle; border-bottom:1px
 .interp-row td { padding:4px 14px 10px 30px; background:#f0fdf4; border-bottom:1px solid #e4ecf8; border-left:3px solid #16a34a; font-size:10.5px; color:#166534; line-height:1.6; font-style:italic; }
 .interp-label  { font-weight:700; font-style:normal; color:#15803d; margin-right:5px; }
 
-.remarks-box { margin:16px 0 4px; padding:11px 16px; background:#fffbeb; border-left:5px solid {{ $t['accent'] }}; font-size:11px; line-height:1.65; color:#3d2e00; }
+.remarks-box { margin:16px 0 4px; padding:11px 16px; background:#fffbeb; border-left:5px solid <?php echo e($t['accent']); ?>; font-size:11px; line-height:1.65; color:#3d2e00; }
 
 .end-rpt { text-align:center; font-size:9px; color:#a0aac0; margin:24px 0 12px; padding:7px 0; border-top:1px dashed #c8d8ee; border-bottom:1px dashed #c8d8ee; letter-spacing:.08em; text-transform:uppercase; }
 .has-break { page-break-after:always; }
@@ -110,14 +110,14 @@ table.rtbl tbody td { padding:9px 14px; vertical-align:middle; border-bottom:1px
 @media screen {
     /* ── CSS custom properties (JS updates these for real-time theme changes) ── */
     :root {
-        --c-primary:        {{ $t['primary'] }};
-        --c-primary-dark:   {{ $t['primaryDark'] }};
-        --c-primary-lite:   {{ $t['primaryLite'] }};
-        --c-primary-border: {{ $t['primaryBorder'] }};
-        --c-primary-tint:   {{ $t['primaryTint'] }};
-        --c-legend-bg:      {{ $t['legendBg'] }};
-        --c-legend-border:  {{ $t['legendBorder'] }};
-        --c-accent:         {{ $t['accent'] }};
+        --c-primary:        <?php echo e($t['primary']); ?>;
+        --c-primary-dark:   <?php echo e($t['primaryDark']); ?>;
+        --c-primary-lite:   <?php echo e($t['primaryLite']); ?>;
+        --c-primary-border: <?php echo e($t['primaryBorder']); ?>;
+        --c-primary-tint:   <?php echo e($t['primaryTint']); ?>;
+        --c-legend-bg:      <?php echo e($t['legendBg']); ?>;
+        --c-legend-border:  <?php echo e($t['legendBorder']); ?>;
+        --c-accent:         <?php echo e($t['accent']); ?>;
     }
 
     /* ── All color-dependent rules now reference variables ── */
@@ -235,48 +235,50 @@ table.rtbl tbody td { padding:9px 14px; vertical-align:middle; border-bottom:1px
 </head>
 <body>
 
-{{-- ══ ACTION BAR (screen only) ══ --}}
+
 <div id="action-bar">
-  {{-- Left: patient info --}}
+  
   <div class="ab-left">
     <div class="ab-dot"></div>
     <div>
-      <div class="ab-title">{{ strtoupper($report->patient_name ?? 'Patient') }}</div>
+      <div class="ab-title"><?php echo e(strtoupper($report->patient_name ?? 'Patient')); ?></div>
       <div class="ab-sub">
-        #{{ str_pad($report->id, 6, '0', STR_PAD_LEFT) }}
-        &middot; {{ $report->test_date ? \Carbon\Carbon::parse($report->test_date)->format('d M Y') : '' }}
+        #<?php echo e(str_pad($report->id, 6, '0', STR_PAD_LEFT)); ?>
+
+        &middot; <?php echo e($report->test_date ? \Carbon\Carbon::parse($report->test_date)->format('d M Y') : ''); ?>
+
       </div>
     </div>
   </div>
 
-  {{-- Center: theme color swatches --}}
+  
   <div class="ab-themes">
     <span class="ab-themes-label">Theme</span>
-    <span class="theme-sw {{ ($selectedTheme ?? 'navy') === 'navy'    ? 'active' : '' }}"
+    <span class="theme-sw <?php echo e(($selectedTheme ?? 'navy') === 'navy'    ? 'active' : ''); ?>"
           data-theme="navy"    style="background:#1a3461" title="Navy Blue"></span>
-    <span class="theme-sw {{ ($selectedTheme ?? 'navy') === 'teal'    ? 'active' : '' }}"
+    <span class="theme-sw <?php echo e(($selectedTheme ?? 'navy') === 'teal'    ? 'active' : ''); ?>"
           data-theme="teal"    style="background:#0e7490" title="Teal"></span>
-    <span class="theme-sw {{ ($selectedTheme ?? 'navy') === 'emerald' ? 'active' : '' }}"
+    <span class="theme-sw <?php echo e(($selectedTheme ?? 'navy') === 'emerald' ? 'active' : ''); ?>"
           data-theme="emerald" style="background:#166534" title="Emerald"></span>
-    <span class="theme-sw {{ ($selectedTheme ?? 'navy') === 'purple'  ? 'active' : '' }}"
+    <span class="theme-sw <?php echo e(($selectedTheme ?? 'navy') === 'purple'  ? 'active' : ''); ?>"
           data-theme="purple"  style="background:#5b21b6" title="Purple"></span>
-    <span class="theme-sw {{ ($selectedTheme ?? 'navy') === 'rose'    ? 'active' : '' }}"
+    <span class="theme-sw <?php echo e(($selectedTheme ?? 'navy') === 'rose'    ? 'active' : ''); ?>"
           data-theme="rose"    style="background:#9f1239" title="Rose"></span>
-    <span class="theme-sw {{ ($selectedTheme ?? 'navy') === 'slate'   ? 'active' : '' }}"
+    <span class="theme-sw <?php echo e(($selectedTheme ?? 'navy') === 'slate'   ? 'active' : ''); ?>"
           data-theme="slate"   style="background:#1e293b" title="Charcoal"></span>
-    {{-- Custom color picker --}}
+    
     <label class="color-pick-wrap" title="Pick any color">
       &#127912;
-      <input type="color" id="custom-color" value="{{ $t['primary'] }}">
+      <input type="color" id="custom-color" value="<?php echo e($t['primary']); ?>">
     </label>
   </div>
 
-  {{-- Right: action buttons --}}
+  
   <div class="ab-btns">
     <a href="javascript:history.back()" class="ab-btn btn-back">&#8592; Back</a>
     <button onclick="window.print()" class="ab-btn btn-print">&#9113; Print</button>
     <button onclick="toggleInterp()" id="interp-btn" class="ab-btn btn-interp">&#128065; Interpretation</button>
-    <a id="download-btn" href="{{ route('user.reports.download', $report) }}?theme={{ $selectedTheme ?? 'navy' }}" class="ab-btn btn-download">&#11123; Download PDF</a>
+    <a id="download-btn" href="<?php echo e(route('user.reports.download', $report)); ?>?theme=<?php echo e($selectedTheme ?? 'navy'); ?>" class="ab-btn btn-download">&#11123; Download PDF</a>
   </div>
 </div>
 
@@ -315,8 +317,8 @@ function customTheme(primary) {
 }
 
 /* ── Apply theme to CSS variables ── */
-var downloadBase = '{{ route("user.reports.download", $report) }}';
-var activeThemeName = '{{ $selectedTheme ?? "navy" }}';
+var downloadBase = '<?php echo e(route("user.reports.download", $report)); ?>';
+var activeThemeName = '<?php echo e($selectedTheme ?? "navy"); ?>';
 
 function applyTheme(t, name) {
     var r = document.documentElement;
@@ -367,9 +369,9 @@ function toggleInterp() {
 
 <div id="page-card">
 
-{{-- ══ HEADER ══ --}}
+
 <div id="hdr">
-@php
+<?php
   $user   = $report->user;
   $logo64 = '';
   if (!empty($user?->logo)) {
@@ -379,27 +381,27 @@ function toggleInterp() {
                   . ';base64,' . base64_encode(file_get_contents($lp));
       }
   }
-@endphp
+?>
 
   <table class="brand-tbl">
     <tr>
       <td class="b-left">
-        @if($logo64)
-          <img src="{{ $logo64 }}" alt="Logo" style="max-height:44px;max-width:190px;display:block;margin-bottom:4px;">
-        @else
-          <div class="lab-main-name">{{ $user?->name ?? 'Diagnostic Centre' }}</div>
-        @endif
+        <?php if($logo64): ?>
+          <img src="<?php echo e($logo64); ?>" alt="Logo" style="max-height:44px;max-width:190px;display:block;margin-bottom:4px;">
+        <?php else: ?>
+          <div class="lab-main-name"><?php echo e($user?->name ?? 'Diagnostic Centre'); ?></div>
+        <?php endif; ?>
         <div class="lab-sub-tag">Trusted Diagnostics &middot; Accurate Results</div>
         <div class="rpt-badge">Laboratory Report</div>
       </td>
       <td class="b-right">
         <div class="lab-contact-info">
-          @if($user?->address){{ $user->address }}<br>@endif
-          @if($user?->reference_lab)Ref Lab: {{ $user->reference_lab }}<br>@endif
-          @if($user?->mobile){{ $user->mobile }}@endif
-          @if($user?->mobile && $user?->email) &middot; @endif
-          @if($user?->email){{ $user->email }}@endif
-          @if($user?->website)<br>{{ $user->website }}@endif
+          <?php if($user?->address): ?><?php echo e($user->address); ?><br><?php endif; ?>
+          <?php if($user?->reference_lab): ?>Ref Lab: <?php echo e($user->reference_lab); ?><br><?php endif; ?>
+          <?php if($user?->mobile): ?><?php echo e($user->mobile); ?><?php endif; ?>
+          <?php if($user?->mobile && $user?->email): ?> &middot; <?php endif; ?>
+          <?php if($user?->email): ?><?php echo e($user->email); ?><?php endif; ?>
+          <?php if($user?->website): ?><br><?php echo e($user->website); ?><?php endif; ?>
         </div>
       </td>
     </tr>
@@ -407,24 +409,24 @@ function toggleInterp() {
 
   <table class="pt-strip">
     <tr class="pt-row1">
-      <td><div class="pt-lbl">Patient Name</div><div class="pt-val">{{ strtoupper($report->patient_name ?? '—') }}</div></td>
-      <td><div class="pt-lbl">Age / Gender</div><div class="pt-val">{{ $report->age ?? '—' }} Yrs / {{ ucfirst($report->gender ?? '—') }}</div></td>
+      <td><div class="pt-lbl">Patient Name</div><div class="pt-val"><?php echo e(strtoupper($report->patient_name ?? '—')); ?></div></td>
+      <td><div class="pt-lbl">Age / Gender</div><div class="pt-val"><?php echo e($report->age ?? '—'); ?> Yrs / <?php echo e(ucfirst($report->gender ?? '—')); ?></div></td>
       <td>
         <div class="pt-lbl">Sample Collected</div>
-        <div class="pt-val">{{ $report->test_date ? \Carbon\Carbon::parse($report->test_date)->format('d M Y') : '—' }}</div>
+        <div class="pt-val"><?php echo e($report->test_date ? \Carbon\Carbon::parse($report->test_date)->format('d M Y') : '—'); ?></div>
       </td>
-      <td><div class="pt-lbl">Report No.</div><div class="pt-val">{{ str_pad($report->id, 6, '0', STR_PAD_LEFT) }}</div></td>
+      <td><div class="pt-lbl">Report No.</div><div class="pt-val"><?php echo e(str_pad($report->id, 6, '0', STR_PAD_LEFT)); ?></div></td>
     </tr>
     <tr>
-      <td><div class="pt-lbl">Referred By</div><div class="pt-val">{{ $report->referred_by ?? '—' }}</div></td>
-      <td><div class="pt-lbl">Client / Hospital</div><div class="pt-val">{{ strtoupper($report->client_name ?? '—') }}</div></td>
-      <td><div class="pt-lbl">Report Generated</div><div class="pt-val">{{ now()->format('d M Y') }}</div></td>
-      <td><div class="pt-lbl">Lab ID</div><div class="pt-val">{{ $user?->lab_code ?? '—' }}</div></td>
+      <td><div class="pt-lbl">Referred By</div><div class="pt-val"><?php echo e($report->referred_by ?? '—'); ?></div></td>
+      <td><div class="pt-lbl">Client / Hospital</div><div class="pt-val"><?php echo e(strtoupper($report->client_name ?? '—')); ?></div></td>
+      <td><div class="pt-lbl">Report Generated</div><div class="pt-val"><?php echo e(now()->format('d M Y')); ?></div></td>
+      <td><div class="pt-lbl">Lab ID</div><div class="pt-val"><?php echo e($user?->lab_code ?? '—'); ?></div></td>
     </tr>
   </table>
-</div>{{-- /hdr --}}
+</div>
 
-{{-- ══ FOOTER ══ --}}
+
 <div id="ftr">
   <table class="legend-tbl">
     <tr>
@@ -442,20 +444,21 @@ function toggleInterp() {
   <table class="footer-tbl">
     <tr>
       <td class="f-disclaimer">
-        {{ $user?->note ?? 'This report is subject to the terms and conditions mentioned overleaf. Results are intended for medical use only. Partial reproduction of this report is not permitted.' }}
+        <?php echo e($user?->note ?? 'This report is subject to the terms and conditions mentioned overleaf. Results are intended for medical use only. Partial reproduction of this report is not permitted.'); ?>
+
       </td>
       <td class="f-right">
         <div class="pg-num"></div>
-        <div class="f-sig-name">{{ $user?->name ?? 'Authorized Signatory' }}</div>
-        <div class="f-sig-title">{{ $user?->qualification ?? 'Medical Director' }}</div>
+        <div class="f-sig-name"><?php echo e($user?->name ?? 'Authorized Signatory'); ?></div>
+        <div class="f-sig-title"><?php echo e($user?->qualification ?? 'Medical Director'); ?></div>
       </td>
     </tr>
   </table>
-</div>{{-- /ftr --}}
+</div>
 
-{{-- ══ CONTENT ══ --}}
+
 <div id="main">
-@php
+<?php
   $statTotal = 0; $statH = 0; $statL = 0; $statN = 0;
   foreach ($report->results->sortBy('display_order') as $_r) {
       $statTotal++;
@@ -478,38 +481,38 @@ function toggleInterp() {
       ->groupBy(fn($r) => optional(optional($r->test)->category)->name ?? 'Test Results');
   $catKeys = $byCategory->keys()->toArray();
   $lastKey = end($catKeys);
-@endphp
+?>
 
-@if($statTotal > 0)
+<?php if($statTotal > 0): ?>
 <table class="stat-bar">
   <tr>
-    <td><span class="stat-num stat-total">{{ $statTotal }}</span><span class="stat-lbl">Total Tests</span></td>
-    <td><span class="stat-num stat-high">{{ $statH }}</span><span class="stat-lbl">High &#8593;</span></td>
-    <td><span class="stat-num stat-low">{{ $statL }}</span><span class="stat-lbl">Low &#8595;</span></td>
-    <td><span class="stat-num stat-norm">{{ $statN }}</span><span class="stat-lbl">Normal &#10003;</span></td>
+    <td><span class="stat-num stat-total"><?php echo e($statTotal); ?></span><span class="stat-lbl">Total Tests</span></td>
+    <td><span class="stat-num stat-high"><?php echo e($statH); ?></span><span class="stat-lbl">High &#8593;</span></td>
+    <td><span class="stat-num stat-low"><?php echo e($statL); ?></span><span class="stat-lbl">Low &#8595;</span></td>
+    <td><span class="stat-num stat-norm"><?php echo e($statN); ?></span><span class="stat-lbl">Normal &#10003;</span></td>
   </tr>
 </table>
-@endif
+<?php endif; ?>
 
-@forelse($byCategory as $catName => $catResults)
-  <div class="{{ $catName !== $lastKey ? 'has-break' : '' }}">
+<?php $__empty_1 = true; $__currentLoopData = $byCategory; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $catName => $catResults): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+  <div class="<?php echo e($catName !== $lastKey ? 'has-break' : ''); ?>">
 
-    @if($report->panel?->name)
-      <div class="panel-badge">{{ $report->panel->name }}</div>
-    @endif
+    <?php if($report->panel?->name): ?>
+      <div class="panel-badge"><?php echo e($report->panel->name); ?></div>
+    <?php endif; ?>
 
-    <div class="section-title">{{ $catName }}</div>
+    <div class="section-title"><?php echo e($catName); ?></div>
 
-    @php $byGroup = $catResults->groupBy(fn($r) => optional($r->test)->test_group ?? ''); @endphp
+    <?php $byGroup = $catResults->groupBy(fn($r) => optional($r->test)->test_group ?? ''); ?>
 
-    @foreach($byGroup as $groupName => $rows)
+    <?php $__currentLoopData = $byGroup; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $groupName => $rows): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
       <table class="rtbl">
         <thead>
-          @if($groupName)
+          <?php if($groupName): ?>
           <tr class="grp-hdr">
-            <td colspan="4">{{ strtoupper($groupName) }}</td>
+            <td colspan="4"><?php echo e(strtoupper($groupName)); ?></td>
           </tr>
-          @endif
+          <?php endif; ?>
           <tr>
             <th style="width:42%">Test Parameter</th>
             <th class="th-result" style="width:16%">Result</th>
@@ -518,8 +521,8 @@ function toggleInterp() {
           </tr>
         </thead>
         <tbody>
-          @foreach($rows as $i => $result)
-            @php
+          <?php $__currentLoopData = $rows; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $result): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php
               $raw  = $result->value ?? '';
               $num  = is_numeric($raw) ? floatval($raw) : null;
               $rng  = trim($result->reference_range ?? '');
@@ -540,37 +543,39 @@ function toggleInterp() {
               elseif ($flag==='L')     { $rowBg='#fffbeb'; $borderL='border-left:3px solid #b84a05;'; }
               elseif ($resCls==='result-N') { $rowBg=($i%2===0)?'#ffffff':'#f5faf0'; $borderL=''; }
               else                     { $rowBg=($i%2===0)?'#ffffff':'#f8faff';  $borderL=''; }
-            @endphp
-            <tr style="background:{{ $rowBg }};">
-              <td class="param-name" style="width:42%;{{ $borderL }}">{{ $result->test_name ?? '—' }}</td>
-              <td class="result-cell {{ $resCls }}" style="width:16%">
-                {{ $raw !== '' ? $raw : '—' }}
-                @if($flag==='H')<span class="flag flag-H">&#8593;&nbsp;H</span>@endif
-                @if($flag==='L')<span class="flag flag-L">&#8595;&nbsp;L</span>@endif
+            ?>
+            <tr style="background:<?php echo e($rowBg); ?>;">
+              <td class="param-name" style="width:42%;<?php echo e($borderL); ?>"><?php echo e($result->test_name ?? '—'); ?></td>
+              <td class="result-cell <?php echo e($resCls); ?>" style="width:16%">
+                <?php echo e($raw !== '' ? $raw : '—'); ?>
+
+                <?php if($flag==='H'): ?><span class="flag flag-H">&#8593;&nbsp;H</span><?php endif; ?>
+                <?php if($flag==='L'): ?><span class="flag flag-L">&#8595;&nbsp;L</span><?php endif; ?>
               </td>
-              <td class="unit-cell"  style="width:14%">{{ $result->unit ?? '' }}</td>
-              <td class="range-cell" style="width:28%">{{ $rng ?: '—' }}</td>
+              <td class="unit-cell"  style="width:14%"><?php echo e($result->unit ?? ''); ?></td>
+              <td class="range-cell" style="width:28%"><?php echo e($rng ?: '—'); ?></td>
             </tr>
-            @if(!empty($result->interpretation))
+            <?php if(!empty($result->interpretation)): ?>
             <tr class="interp-row">
-              <td colspan="4"><span class="interp-label">Interpretation:</span>{{ $result->interpretation }}</td>
+              <td colspan="4"><span class="interp-label">Interpretation:</span><?php echo e($result->interpretation); ?></td>
             </tr>
-            @endif
-          @endforeach
+            <?php endif; ?>
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </tbody>
       </table>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-    @if(!empty($report->remarks) && $catName === $lastKey)
-      <div class="remarks-box"><strong>Clinical Remarks:</strong>&nbsp;{{ $report->remarks }}</div>
-    @endif
+    <?php if(!empty($report->remarks) && $catName === $lastKey): ?>
+      <div class="remarks-box"><strong>Clinical Remarks:</strong>&nbsp;<?php echo e($report->remarks); ?></div>
+    <?php endif; ?>
 
     <div class="end-rpt">&mdash;&nbsp; End of Report &nbsp;&mdash;</div>
   </div>
-@empty
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
   <p style="text-align:center;padding:56px;color:#a0aac0;font-style:italic;font-size:13px;">No test results recorded for this report.</p>
-@endforelse
-</div>{{-- /main --}}
-</div>{{-- /page-card --}}
+<?php endif; ?>
+</div>
+</div>
 </body>
 </html>
+<?php /**PATH C:\lab-management\resources\views/reports/print.blade.php ENDPATH**/ ?>

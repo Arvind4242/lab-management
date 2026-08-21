@@ -138,6 +138,7 @@ data-category="{{ $test->category_id }}">
 <th class="p-3 text-left">Value</th>
 <th class="p-3 text-left">Unit</th>
 <th class="p-3 text-left">Range</th>
+<th class="p-3 text-left">Interpretation</th>
 <th class="p-3 text-left">Action</th>
 </tr>
 
@@ -146,7 +147,7 @@ data-category="{{ $test->category_id }}">
 <tbody id="test-list">
 
 <tr>
-<td colspan="5" class="text-center text-gray-400 py-8">
+<td colspan="6" class="text-center text-gray-400 py-8">
 Select tests to begin
 </td>
 </tr>
@@ -325,6 +326,16 @@ data-female="${test.reference_range_female ?? ''}"
 data-other="${test.reference_range_other ?? ''}">
 
 ${range}
+
+</td>
+
+
+<td>
+
+<input type="text"
+name="tests[${test.id}][interpretation]"
+placeholder="Optional interpretation"
+class="fi-input w-full text-sm">
 
 </td>
 

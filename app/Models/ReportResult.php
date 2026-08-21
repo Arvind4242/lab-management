@@ -9,7 +9,7 @@ class ReportResult extends Model
     //  use HasFactory;
 
    protected $fillable = [
-        'report_id', 'report_test_id', 'test_name', 'parameter_name', 'value', 'unit', 'reference_range'
+        'report_id', 'report_test_id', 'test_name', 'parameter_name', 'value', 'unit', 'reference_range', 'interpretation',
     ];
 
     protected $appends = ['category_name'];
